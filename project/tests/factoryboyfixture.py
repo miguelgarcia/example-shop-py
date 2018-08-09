@@ -14,8 +14,8 @@ def make_fixture(cls):
             if isinstance(value, (factory.SubFactory, factory.RelatedFactory)):
                 _update_session(value.get_factory(), session)
 
-    def fix_func(session):
-        _update_session(cls, session)
+    def fix_func(db_session):
+        _update_session(cls, db_session)
         return cls
     fixture=pytest.fixture(fix_func)
     setattr(sys.modules[cls.__module__], get_factory_name(cls), fixture)

@@ -1,6 +1,6 @@
 import pytest
 from flask import json, jsonify
-from app import models
+from project import models
 
 def test_get(client, category_factory):
     """ Retrieve one category """
@@ -48,7 +48,7 @@ def test_list_limit_offset(client, category_factory):
     assert 'x-next' in rv.headers
     assert rv.headers['x-next'] == 'http://localhost/api/categories?offset=4&limit=3'
 
-def test_category_post(client, session):
+def test_category_post(client, db_session):
     """ Create a new category """
     req = """ { "name": "category 1" } """
     rv = client.post('/api/categories', data=req, content_type='application/json')
@@ -104,6 +104,7 @@ def test_category_delete(client, category_factory):
 
 def test_category_delete_404(client, category_factory):
     """ Try to delete a non existing category """
+    print(models.Category.query.count())
     category = category_factory.create()
     id = category.id
     rv = client.delete('/api/categories/2')

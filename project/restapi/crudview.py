@@ -2,7 +2,7 @@ from flask.views import MethodView
 from flask import jsonify, request
 from .schemas import ListArgsSchema
 from sqlalchemy.exc import IntegrityError
-
+from project.settings import db
 
 class CrudView(MethodView):
     class Meta:
@@ -11,12 +11,14 @@ class CrudView(MethodView):
         list_schema = None
         post_schema = None
         put_schema = None
-        db = None
 
     def __new__(cls, *args, **kwargs):
-        o = super(CrudView, cls).__new__(cls, *args, **kwargs)
+        o = super().__new__(cls)
         o._meta = getattr(o, 'Meta')
         return o
+
+    def __init__(self, session):
+        self.session = db.session
 
     def list(self):
         args_cleaned = ListArgsSchema().load(request.args)
@@ -38,9 +40,9 @@ class CrudView(MethodView):
         if not json_data:
             return jsonify({'status': 400, 'message': 'No input data provided'}), 400
         o = self._meta.post_schema().load(json_data)
-        self._meta.db.session.add(o)
+        self.session.add(o)
         try:
-            self._meta.db.session.commit()
+            self.session.commit()
         except IntegrityError:
             return jsonify({'status': 400, 'message': 'Integrity error'}), 400
         return jsonify(o.id), 201
@@ -49,8 +51,8 @@ class CrudView(MethodView):
         o = self._meta.model.query.get(id)
         if o is None:
             return jsonify({'status': 404, 'message': 'Not found'}), 404
-        self._meta.db.session.delete(o)
-        self._meta.db.session.commit()
+        self.session.delete(o)
+        self.session.commit()
         return '', 204
 
     def put(self, id):
@@ -62,7 +64,7 @@ class CrudView(MethodView):
             return jsonify({'status': 400, 'message': 'No input data provided'}), 400
         o = self._meta.put_schema().load(json_data, instance=o)
         try:
-            self._meta.db.session.commit()
+            self.session.commit()
         except IntegrityError:
             return jsonify({'status': 400, 'message': 'Integrity error'}), 400
         return '', 204

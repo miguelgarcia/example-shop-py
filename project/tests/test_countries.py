@@ -1,6 +1,6 @@
 import pytest
 from flask import json, jsonify
-from app import models
+from project import models
 
 def test_get(client, country_factory):
     """ Retrieve one country """
@@ -48,7 +48,7 @@ def test_list_limit_offset(client, country_factory):
     assert 'x-next' in rv.headers
     assert rv.headers['x-next'] == 'http://localhost/api/countries?offset=4&limit=3'
 
-def test_country_post(client, session):
+def test_country_post(client, db_session):
     """ Create a new country """
     req = """ { "name": "country 1" } """
     rv = client.post('/api/countries', data=req, content_type='application/json')

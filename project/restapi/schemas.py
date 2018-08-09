@@ -1,6 +1,6 @@
-from app.marshmallow import ma
+from project.settings import ma
 from marshmallow import validate
-from app import models
+from project import models
 
 class ListArgsSchema(ma.Schema):
     limit = ma.Integer(required=False, validate=[

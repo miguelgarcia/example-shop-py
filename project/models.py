@@ -7,8 +7,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import func
 from sqlalchemy.sql import label
 
-from app.database import db
-
+from project.settings import db
 
 class Category(db.Model):
     __tablename__ = 'category'

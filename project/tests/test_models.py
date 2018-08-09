@@ -3,12 +3,7 @@ import random
 import pytest
 from sqlalchemy.exc import IntegrityError
 
-from app.models import *
-
-# REST
-# GraphQL
-# Comments
-# README: DER, explain: model, migrations, rest, graphql, tests, ci, docker, aws
+from project.models import *
 
 def test_products_count_by_category(product_factory, category_factory):
     """ Test counting products in all categories """

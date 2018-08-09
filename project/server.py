@@ -1,23 +1,13 @@
 import logging
 import os
-
+from project.settings import app, db, ma, migrate
 from flask import jsonify
-from app.database import db
-
-import app.models
-
-from .factory import create_app
-
+import project.models
+from .restapi import api
 logger = logging.getLogger(__name__)
 
-
-app_settings = os.getenv(
-    'APP_SETTINGS',
-    'app.config.DevelopmentConfig'
-)
-
-app = create_app(app_settings)
-
+app.register_blueprint(api, url_prefix='/api')
+print("server")
 @app.route('/help', methods=['GET'])
 def help():
     """Print available functions."""
@@ -32,5 +22,5 @@ from flask import Flask
 @app.cli.command()
 def populate_db():
     """ Populates the database with generated data """
-    import app.tests.factories as factories
+    import project.tests.factories as factories
     factories.category_factory(db.session).create_batch(10)

@@ -1,4 +1,4 @@
-from app import models
+from project import models
 import factory
 from .factoryboyfixture import make_fixture
 
