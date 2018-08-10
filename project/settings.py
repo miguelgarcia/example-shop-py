@@ -11,9 +11,8 @@ app.config.from_object(os.getenv(
     'project.config.DevelopmentConfig'
 ))
 db = SQLAlchemy(app)
-engine = db.engine
 ma = Marshmallow(app)
-migrate = Migrate(app)
+migrate = Migrate(app, db)
 
 
 
