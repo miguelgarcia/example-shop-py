@@ -17,3 +17,16 @@ class CountrySchema(ma.ModelSchema):
     class Meta:
         model = models.Country
         fields = ('id', 'name')
+
+class CustomerSchema(ma.ModelSchema):
+    class Meta:
+        model = models.Customer
+        fields = ('id', 'email', 'firstname', 'lastname', 'country')
+
+    country = ma.Nested(CountrySchema, required=True)
+
+class CustomerSchemaDeserialize(CustomerSchema):
+    class Meta:
+        model = models.Customer
+        fields = ('email', 'firstname', 'lastname', 'country')
+    country = ma.Function(deserialize=lambda v: models.Country.query.get(v), load_only=True)

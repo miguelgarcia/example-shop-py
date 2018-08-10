@@ -1,7 +1,7 @@
-from project.models import Category, Country
+from project.models import Category, Country, Customer
 
 from .crudview import CrudView
-from .schemas import CategorySchema, CountrySchema
+from .schemas import CategorySchema, CountrySchema, CustomerSchema, CustomerSchemaDeserialize
 
 
 class CategoriesView(CrudView):
@@ -19,3 +19,11 @@ class CountriesView(CrudView):
         list_schema = CountrySchema
         post_schema = lambda: CountrySchema(exclude=('id',))
         put_schema = lambda: CountrySchema(exclude=('id',))
+
+class CustomersView(CrudView):
+    class Meta:
+        model = Customer
+        get_schema = CustomerSchema
+        list_schema = CustomerSchema
+        post_schema = CustomerSchemaDeserialize
+        put_schema = CustomerSchemaDeserialize
