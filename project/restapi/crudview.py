@@ -43,7 +43,7 @@ class CrudView(MethodView):
         self.session.add(o)
         try:
             self.session.commit()
-        except IntegrityError:
+        except IntegrityError as e:
             return jsonify({'status': 400, 'message': 'Integrity error'}), 400
         return jsonify(o.id), 201
 

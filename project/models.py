@@ -20,6 +20,16 @@ class Category(db.Model):
     def products_count(self):
         return self.products.count()
 
+    class CategoryQuery(BaseQuery):
+        def get_or_create(self, name):
+            with db.session.no_autoflush:
+                category = Category.query.filter(Category.name == name).first()
+                if category is None:
+                    category = Category(name=name)
+            return category
+
+    query_class = CategoryQuery
+
 class CategoriesManager:
     @staticmethod
     def count_all_products():
@@ -65,6 +75,16 @@ class Tag(db.Model):
     def __repr__(self):
         return '<Tag %r>' % self.name
 
+    class TagQuery(BaseQuery):
+        def get_or_create(self, name):
+            with db.session.no_autoflush:
+                tag = Tag.query.filter(Tag.name == name).first()
+                if tag is None:
+                    tag = Tag(name=name)
+            return tag
+
+    query_class = TagQuery
+
 
 class ProductStatusEnum(enum.Enum):
     ACTIVE = 'ACTIVE'
@@ -76,7 +96,7 @@ class Product(db.Model):
     __tablename__ = 'product'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(50), nullable=False, unique=True)
-    description = db.Column(db.UnicodeText(), unique=True)
+    description = db.Column(db.UnicodeText())
     price = db.Column(db.Numeric(precision=2, asdecimal=True))
     category_id = db.Column(db.Integer, db.ForeignKey(
         'category.id'), nullable=False)
@@ -88,9 +108,9 @@ class Product(db.Model):
     tags_rel = db.relationship(
         'Tag', secondary='product_tag', backref='products')
     tags = association_proxy(
-        'tags_rel', 'name', creator=lambda name: Tag(name=name))
+        'tags_rel', 'name', creator=lambda name: Tag.query.get_or_create(name=name))
     category_name = association_proxy(
-        'category', 'name', creator=lambda name: Tag(name=name))
+        'category', 'name', creator=lambda name: Category.query.get_or_create(name=name))
 
     def __repr__(self):
         return '<Product %r>' % self.name

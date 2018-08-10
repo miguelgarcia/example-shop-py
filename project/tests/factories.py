@@ -21,6 +21,23 @@ class CategoryFactory(factory.alchemy.SQLAlchemyModelFactory):
     name = factory.Sequence(lambda n: u'Category %d' % n)
 
 @make_fixture
+class TagFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = models.Tag
+        sqlalchemy_session = None
+        sqlalchemy_session_persistence = 'commit'
+
+    name = factory.Sequence(lambda n: u'Tag %d' % n)
+
+class ProductTagFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = models.ProductTag
+        sqlalchemy_session = None
+        sqlalchemy_session_persistence = 'commit'
+
+    tag = factory.SubFactory(TagFactory)
+
+@make_fixture
 class ProductFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = models.Product
@@ -32,6 +49,8 @@ class ProductFactory(factory.alchemy.SQLAlchemyModelFactory):
     price = factory.Faker('pydecimal', left_digits=3, right_digits=2, positive=True)
     status = models.ProductStatusEnum.ACTIVE
     category = factory.SubFactory(CategoryFactory)
+    tag1 = factory.RelatedFactory(ProductTagFactory, 'product')
+    tag2 = factory.RelatedFactory(ProductTagFactory, 'product')
 
 @make_fixture
 class CustomerFactory(factory.alchemy.SQLAlchemyModelFactory):

@@ -1,3 +1,5 @@
+import collections
+
 def model_to_dict(model, fields):
     """ build dict from model object, only include fields listed in `fields`
       example: ['id', 'email', 'firstname', 'lastname', ('country', ['id', 'name'])]
@@ -15,7 +17,7 @@ def model_to_dict(model, fields):
 
       If model is a list returns a list of dicts, containing one dict for each model
      """
-    if isinstance(model, list):
+    if isinstance(model, collections.Iterable):
         return [model_to_dict(x, fields) for x in model]
     ret = dict()
     for f in fields:
