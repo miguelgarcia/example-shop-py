@@ -35,25 +35,33 @@ class CrudView(MethodView):
             return jsonify(dict(status=404, message='Not found')), 404
         return self._meta.get_schema().jsonify(o)
 
+    def _try_commit(self):
+        try:
+            self.session.commit()
+            return None
+        except IntegrityError as e:
+            self.session.rollback()
+            return jsonify({'status': 400, 'message': 'Integrity error'}), 400
+        except Exception:
+            self.session.rollback()
+            return jsonify({'status': 400, 'message': 'DB write error'}), 400
+
     def post(self):
         json_data = request.get_json()
         if not json_data:
             return jsonify({'status': 400, 'message': 'No input data provided'}), 400
         o = self._meta.post_schema().load(json_data)
         self.session.add(o)
-        try:
-            self.session.commit()
-        except IntegrityError as e:
-            return jsonify({'status': 400, 'message': 'Integrity error'}), 400
-        return jsonify(o.id), 201
+        resp = self._try_commit()
+        return resp if resp is not None else (jsonify(o.id), 201)
 
     def delete(self, id):
         o = self._meta.model.query.get(id)
         if o is None:
             return jsonify({'status': 404, 'message': 'Not found'}), 404
         self.session.delete(o)
-        self.session.commit()
-        return '', 204
+        resp = self._try_commit()
+        return resp if resp is not None else ('', 204)
 
     def put(self, id):
         o = self._meta.model.query.get(id)
@@ -63,8 +71,5 @@ class CrudView(MethodView):
         if not json_data:
             return jsonify({'status': 400, 'message': 'No input data provided'}), 400
         o = self._meta.put_schema().load(json_data, instance=o)
-        try:
-            self.session.commit()
-        except IntegrityError:
-            return jsonify({'status': 400, 'message': 'Integrity error'}), 400
-        return '', 204
+        resp = self._try_commit()
+        return resp if resp is not None else ('', 204)

@@ -50,3 +50,21 @@ class ProductDeserializeSchema(ProductSchema):
     category = ma.Function(deserialize=lambda v: models.Category.query.get(v), required=True, validate=[validate.NoneOf([None])])
     status = ma.Function(deserialize=lambda v: models.ProductStatusEnum[v] if v in models.ProductStatusEnum.__members__ else None, required=True, validate=[validate.NoneOf([None])])
     tags = ma.List(ma.String())
+
+class OrderDetailSchema(ma.Schema):
+    class Meta:
+        model = models.OrderDetail
+        fields = ('id', 'quantity', 'unit_price', 'product')
+
+    product = ma.Nested(ProductSchema, only=('id', 'name'))
+    unit_price = ma.Decimal(as_string=True,places=2)
+
+class OrderSchema(ma.Schema):
+    class Meta:
+        model = models.Order
+        fields = ('id', 'created_at', 'total', 'status', 'customer', 'detail')
+
+    status = ma.Function(lambda v: v.status.value)
+    customer = ma.Nested(CustomerSchema, only=('id', 'email', 'firstname', 'lastname'))
+    detail = ma.Nested(OrderDetailSchema, many=True)
+    total = ma.Decimal(as_string=True,places=2, dump_only=True)

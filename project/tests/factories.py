@@ -2,6 +2,9 @@ from project import models
 import factory
 from .factoryboyfixture import make_fixture
 
+from project.settings import db
+from sqlalchemy import orm
+
 @make_fixture
 class CountryFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
@@ -29,14 +32,6 @@ class TagFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     name = factory.Sequence(lambda n: u'Tag %d' % n)
 
-class ProductTagFactory(factory.alchemy.SQLAlchemyModelFactory):
-    class Meta:
-        model = models.ProductTag
-        sqlalchemy_session = None
-        sqlalchemy_session_persistence = 'commit'
-
-    tag = factory.SubFactory(TagFactory)
-
 @make_fixture
 class ProductFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
@@ -49,8 +44,13 @@ class ProductFactory(factory.alchemy.SQLAlchemyModelFactory):
     price = factory.Faker('pydecimal', left_digits=3, right_digits=2, positive=True)
     status = models.ProductStatusEnum.ACTIVE
     category = factory.SubFactory(CategoryFactory)
-    tag1 = factory.RelatedFactory(ProductTagFactory, 'product')
-    tag2 = factory.RelatedFactory(ProductTagFactory, 'product')
+
+    @factory.post_generation
+    def tags(self, create, extracted, **kwargs):
+        a_tag_factory = tag_factory(ProductFactory._meta.sqlalchemy_session)
+        for _ in range(2):
+            tag = a_tag_factory.create()
+            self.tags.append(tag.name)
 
 @make_fixture
 class CustomerFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -76,6 +76,7 @@ class OrderFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     @factory.post_generation
     def details(self, create, extracted, **kwargs):
+        p = product_factory(OrderFactory._meta.sqlalchemy_session)
         if extracted is not None:
             for _ in range(extracted):
                 self.add_product(ProductFactory.create(), 1)

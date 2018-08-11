@@ -92,3 +92,14 @@ def test_category_delete_404(client, category_factory):
     assert rv.status_code == 404
     data = json.loads(rv.data)
     assert expected_404 == data
+
+def test_category_delete_used(client, product_factory, db_session):
+    """ Delete a category """
+    product = product_factory.create()
+    rv = client.delete('/api/categories/%d' % product.category.id)
+    assert rv.status_code == 400
+    data = json.loads(rv.data)
+    assert expected_integrity_error == data
+    db_session.expunge_all()
+    product = models.Product.query.get(1)
+    assert product.category.id == 1

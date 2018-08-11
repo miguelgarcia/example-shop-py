@@ -1,13 +1,15 @@
 import datetime
+import decimal
 import enum
 
-from flask_sqlalchemy import SQLAlchemy, BaseQuery
+from flask_sqlalchemy import BaseQuery, SQLAlchemy
+from sqlalchemy import func
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import func
 from sqlalchemy.sql import label
 
 from project.settings import db
+
 
 class Category(db.Model):
     __tablename__ = 'category'
@@ -105,10 +107,9 @@ class Product(db.Model):
     status = db.Column(
         db.Enum(ProductStatusEnum, validate_strings=True), nullable=False)
 
-    tags_rel = db.relationship(
-        'Tag', secondary='product_tag', backref='products')
+    rel_tags = db.relationship('Tag', secondary='product_tag', backref='products')
     tags = association_proxy(
-        'tags_rel', 'name', creator=lambda name: Tag.query.get_or_create(name=name))
+        'rel_tags', 'name', creator=lambda name: Tag.query.get_or_create(name=name))
     category_name = association_proxy(
         'category', 'name', creator=lambda name: Category.query.get_or_create(name=name))
 
@@ -140,13 +141,12 @@ class ProductsManager:
 
 class ProductTag(db.Model):
     __tablename__ = 'product_tag'
-    product_id = db.Column(db.Integer, db.ForeignKey(
-        'product.id'), primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), primary_key=True)
     tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), primary_key=True)
-    product = db.relationship('Product', backref=db.backref(
-        'product_tags', cascade='all, delete-orphan'))
-    tag = db.relationship('Tag', backref=db.backref(
-        'product_tags', cascade='all, delete-orphan'))
+    #product = db.relationship('Product', backref=db.backref(
+    #    'product_tags', cascade='all, delete-orphan'))
+    #tag = db.relationship('Tag', backref=db.backref(
+    #    'product_tags', cascade='all, delete-orphan'))
 
 
 class OrderStatusEnum(enum.Enum):
@@ -169,6 +169,10 @@ class OrderDetail(db.Model):
     unit_price = db.Column(db.Numeric(precision=2, asdecimal=True))
     quantity = db.Column(db.Integer, nullable=False)
 
+    @hybrid_property
+    def total(self):
+        return decimal.Decimal(self.unit_price * self.quantity)
+
 
 class Order(db.Model):
     __tablename__ = 'order'
@@ -185,7 +189,7 @@ class Order(db.Model):
 
     @hybrid_property
     def total(self):
-        return sum(map(lambda d: d.unit_price * d.quantity, self.detail))
+        return decimal.Decimal(sum(map(lambda d: d.total, self.detail)))
 
     def add_product(self, product, quantity):
         self.detail.append(OrderDetail(

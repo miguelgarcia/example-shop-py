@@ -116,7 +116,7 @@ def test_product_delete(client, product_factory):
     assert rv.status_code == 204
     assert models.Product.query.get(id) is None
 
-def test_product_delete_404(client, product_factory):
+def test_product_adelete_404(client, product_factory):
     """ Try to delete a non existing product """
     product = product_factory.create()
     id = product.id

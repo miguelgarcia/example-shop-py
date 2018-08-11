@@ -1,7 +1,10 @@
 from flask import Blueprint, jsonify
 from marshmallow.exceptions import ValidationError
-from .views import CategoriesView, CountriesView, CustomersView, ProductsView
+
 from project.settings import db
+
+from .views import (CategoriesView, CountriesView, CustomersView, OrdersView,
+                    ProductsView)
 
 api = Blueprint('api', __name__)
 
@@ -17,8 +20,8 @@ register_crud_view(CategoriesView, 'categories')
 register_crud_view(CountriesView, 'countries')
 register_crud_view(CustomersView, 'customers')
 register_crud_view(ProductsView, 'products')
+register_crud_view(OrdersView, 'orders')
 
 @api.errorhandler(ValidationError)
 def schema_violation_exception_handler(error):
     return jsonify({'status': 422, 'message': str(error)}), 422
-
