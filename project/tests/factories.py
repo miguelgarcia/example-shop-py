@@ -9,7 +9,7 @@ from sqlalchemy import orm
 class CountryFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = models.Country
-        sqlalchemy_session = None
+        sqlalchemy_session = db.session
         sqlalchemy_session_persistence = 'commit'
 
     name = factory.Sequence(lambda n: u'Country %d' % n)

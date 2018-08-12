@@ -1,8 +1,9 @@
-from project.models import Category, Country, Customer, Product, Order
+from project.models import Category, Country, Customer, Order, Product
 
 from .crudview import CrudView
 from .schemas import (CategorySchema, CountrySchema, CustomerDeserializeSchema,
-                      CustomerSchema, OrderSchema, ProductDeserializeSchema,
+                      CustomerSchema, OrderCreateSchema, OrderSchema,
+                      OrderUpdateSchema, ProductDeserializeSchema,
                       ProductSchema)
 
 
@@ -56,5 +57,5 @@ class OrdersView(CrudView):
                 'total', 'customer.id', 'customer.email', 'customer.firstname',
                 'customer.lastname'), **kw)
 
-        post_schema = OrderSchema
-        put_schema = OrderSchema
+        post_schema = OrderCreateSchema
+        put_schema = OrderUpdateSchema

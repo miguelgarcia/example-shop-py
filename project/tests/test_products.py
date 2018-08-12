@@ -88,7 +88,7 @@ def test_product_update(client, product_factory, category_factory):
     req = product_to_dict(product)
     del req['id']
     req['name'] = 'new name'
-    req['tags'] = ['other tag']
+    req['tags'] = ['other tag', 'other 2']
     req['category'] = new_category.id
     rv = client.put('/api/products/%d' % product.id, data=json.dumps(req), content_type='application/json')
     assert rv.status_code == 204

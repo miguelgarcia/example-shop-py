@@ -1,5 +1,5 @@
 from project.settings import ma
-from marshmallow import validate
+from marshmallow import validate, post_load
 from project import models
 
 class ListArgsSchema(ma.Schema):
@@ -51,7 +51,7 @@ class ProductDeserializeSchema(ProductSchema):
     status = ma.Function(deserialize=lambda v: models.ProductStatusEnum[v] if v in models.ProductStatusEnum.__members__ else None, required=True, validate=[validate.NoneOf([None])])
     tags = ma.List(ma.String())
 
-class OrderDetailSchema(ma.Schema):
+class OrderDetailSchema(ma.ModelSchema):
     class Meta:
         model = models.OrderDetail
         fields = ('id', 'quantity', 'unit_price', 'product')
@@ -59,7 +59,7 @@ class OrderDetailSchema(ma.Schema):
     product = ma.Nested(ProductSchema, only=('id', 'name'))
     unit_price = ma.Decimal(as_string=True,places=2)
 
-class OrderSchema(ma.Schema):
+class OrderSchema(ma.ModelSchema):
     class Meta:
         model = models.Order
         fields = ('id', 'created_at', 'total', 'status', 'customer', 'detail')
@@ -68,3 +68,36 @@ class OrderSchema(ma.Schema):
     customer = ma.Nested(CustomerSchema, only=('id', 'email', 'firstname', 'lastname'))
     detail = ma.Nested(OrderDetailSchema, many=True)
     total = ma.Decimal(as_string=True,places=2, dump_only=True)
+
+class OrderDetailCreateSchema(ma.ModelSchema):
+    class Meta:
+        model = models.OrderDetail
+        fields = ('quantity', 'product')
+
+    product = ma.Function(deserialize=lambda v: models.Product.query.get(v), required=True, validate=[validate.NoneOf([None])])
+    quantity = ma.Integer(required=True, validate=[validate.Range(1)])
+
+    @post_load
+    def load_price(self, data):
+        data['unit_price'] = data['product'].price
+        return data
+
+class OrderCreateSchema(ma.ModelSchema):
+    class Meta:
+        model = models.Order
+        fields = ('customer', 'detail')
+
+    customer = ma.Function(deserialize=lambda v: models.Customer.query.get(v), required=True, validate=[validate.NoneOf([None])])
+    detail = ma.Nested(OrderDetailCreateSchema, many=True)
+
+    @post_load
+    def load_detail(self, data):
+        data['status'] = models.OrderStatusEnum.PENDING
+        return data
+
+class OrderUpdateSchema(ma.ModelSchema):
+    class Meta:
+        model = models.Order
+        fields = ('status',)
+
+    status = ma.Function(deserialize=lambda v: models.OrderStatusEnum[v] if v in models.OrderStatusEnum.__members__ else None, required=True, validate=[validate.NoneOf([None])])
