@@ -24,8 +24,11 @@ class CrudView(MethodView):
         args_cleaned = ListArgsSchema().load(request.args)
         limit = args_cleaned.get('limit')
         offset = args_cleaned.get('offset')
-        result = self._meta.model.query.limit(limit).offset(offset)
+        result = self.list_query(self.session, limit ,offset)
         return self._meta.list_schema(many=True).jsonify(result), 200, {'x-next': request.base_url + "?offset=%d&limit=%d" % (offset+limit, limit)}
+
+    def list_query(self, session, limit ,offset):
+        return self._meta.model.query.limit(limit).offset(offset)
 
     def get(self, id):
         if id is None:

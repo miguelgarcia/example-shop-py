@@ -40,28 +40,27 @@ def test_get_404(client, order_factory):
     assert rv.status_code == 404
     assert expected_404 == data
 
-def test_list(client, order_factory):
+def test_orders_list(client, order_factory, db_session):
     """ List all orders """
-    orders = order_factory.create_batch(10)
-    rv = client.get('/api/orders')
+    orders = order_factory.create_batch(10, details=3)
     list_fields = ['id', 'created_at', 'total', 'status', 
         ('customer', ['id', 'email', 'firstname', 'lastname'])]
     expected = order_to_dict(orders, list_fields)
+    rv = client.get('/api/orders')
     data = json.loads(rv.data)
     assert sorted(expected, key=lambda c: c['id']) == sorted(data, key=lambda c: c['id'])
 
 def test_list_limit_offset(client, order_factory):
     """ List a range of orders """
     orders = order_factory.create_batch(10)
-    rv = client.get('/api/orders?offset=1&limit=3')
     list_fields = ['id', 'created_at', 'total', 'status', 
         ('customer', ['id', 'email', 'firstname', 'lastname'])]
     expected = order_to_dict(orders[1:4], list_fields)
+    rv = client.get('/api/orders?offset=1&limit=3')
     data = json.loads(rv.data)
     assert sorted(expected, key=lambda c: c['id']) == sorted(data, key=lambda c: c['id'])
     assert 'x-next' in rv.headers
     assert rv.headers['x-next'] == 'http://localhost/api/orders?offset=4&limit=3'
-
 
 def test_order_post(client, customer_factory, product_factory):
     """ Create a new order """

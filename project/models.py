@@ -3,7 +3,7 @@ import decimal
 import enum
 
 from flask_sqlalchemy import BaseQuery, SQLAlchemy
-from sqlalchemy import func
+from sqlalchemy import func, select
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql import label
@@ -56,7 +56,7 @@ class Customer(db.Model):
     country_id = db.Column(db.Integer, db.ForeignKey(
         'country.id'), nullable=False)
     country = db.relationship('Country', backref='customers')
-    orders = db.relationship('Order', backref=db.backref('customer'),
+    orders = db.relationship('Order', backref=db.backref('customer', lazy='joined'),
                              lazy='dynamic')
 
     class CustomerQuery(BaseQuery):
@@ -143,10 +143,6 @@ class ProductTag(db.Model):
     __tablename__ = 'product_tag'
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), primary_key=True)
     tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), primary_key=True)
-    #product = db.relationship('Product', backref=db.backref(
-    #    'product_tags', cascade='all, delete-orphan'))
-    #tag = db.relationship('Tag', backref=db.backref(
-    #    'product_tags', cascade='all, delete-orphan'))
 
 
 class OrderStatusEnum(enum.Enum):
@@ -190,6 +186,13 @@ class Order(db.Model):
     @hybrid_property
     def total(self):
         return decimal.Decimal(sum(map(lambda d: d.total, self.detail)))
+
+    @total.expression
+    def total(cls):
+        return select([func.sum(OrderDetail.unit_price * OrderDetail.quantity)]).\
+                where(OrderDetail.order_id==cls.id).\
+                label('total')
+
 
     def add_product(self, product, quantity):
         self.detail.append(OrderDetail(

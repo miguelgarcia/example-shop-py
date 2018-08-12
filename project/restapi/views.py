@@ -3,8 +3,8 @@ from project.models import Category, Country, Customer, Order, Product
 from .crudview import CrudView
 from .schemas import (CategorySchema, CountrySchema, CustomerDeserializeSchema,
                       CustomerSchema, OrderCreateSchema, OrderSchema,
-                      OrderUpdateSchema, ProductDeserializeSchema,
-                      ProductSchema)
+                      OrdersListSchema, OrderUpdateSchema,
+                      ProductDeserializeSchema, ProductSchema)
 
 
 class CategoriesView(CrudView):
@@ -51,11 +51,9 @@ class OrdersView(CrudView):
     class Meta:
         model = Order
         get_schema = OrderSchema
-
-        def list_schema(*arg, **kw):
-            return OrderSchema(*arg, only=('id', 'created_at', 'status', 
-                'total', 'customer.id', 'customer.email', 'customer.firstname',
-                'customer.lastname'), **kw)
-
+        list_schema = OrdersListSchema
         post_schema = OrderCreateSchema
         put_schema = OrderUpdateSchema
+
+    def list_query(self, session, limit, offset):
+        return session.query(Order, Order.total).limit(limit).offset(offset)

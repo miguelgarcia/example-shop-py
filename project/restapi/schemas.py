@@ -69,6 +69,22 @@ class OrderSchema(ma.ModelSchema):
     detail = ma.Nested(OrderDetailSchema, many=True)
     total = ma.Decimal(as_string=True,places=2, dump_only=True)
 
+class OrdersListSchema(OrderSchema):
+    class Meta:
+        model = models.Order
+        fields = ('id', 'created_at', 'status', 
+                'customer')
+
+    # Convert from [(<Order>, total)...]
+    def dump(self, obj, *arg, many=None, **kw):
+        if many:
+            result = []
+            for o in obj:
+                result.append(super().dump(o[0], many=False, *arg, **kw))
+                result[-1]['total'] = '{:.2f}'.format(o[1]) if o[1] is not None else '0.00'
+            return result
+        return super().dump(o[0], *arg, **kw)
+
 class OrderDetailCreateSchema(ma.ModelSchema):
     class Meta:
         model = models.OrderDetail
