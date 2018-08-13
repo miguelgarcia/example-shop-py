@@ -28,7 +28,7 @@ def test_order_get(client, order_factory):
     """ Retrieve one order """
     order = order_factory.create(details=3)
     order2 = order_factory.create(details=3)
-    rv = client.get('/api/orders/%d' % order2.id)
+    rv = client.get('/api/orders/{:d}'.format(order2.id))
     data = json.loads(rv.data)
     assert  order_to_dict(order2) == data
 
@@ -79,16 +79,16 @@ def test_order_post(client, customer_factory, product_factory):
     }
     rv = client.post('/api/orders', data=json.dumps(req), content_type='application/json')
     assert rv.status_code == 201
-    assert int(rv.data) == 1
-    order = models.Order.query.get(1)
+    created_id = int(rv.data)
+    order = models.Order.query.get(created_id)
     assert order is not None
     expect = {
-        'id': 1,
+        'id': created_id,
         'status': 'PENDING',
         'customer': model_to_dict(customer, ('id', 'email', 'firstname', 'lastname')),
         'detail': [
             {
-                'id': idx+1,
+                'id': order.detail[idx].id,
                 'product': model_to_dict(products[idx], ('id', 'name')),
                 'quantity': quantities[idx],
                 'unit_price': '{:.2f}'.format(products[idx].price)
@@ -109,7 +109,7 @@ def test_order_update(client, order_factory):
     req = {
         'status': models.OrderStatusEnum.SHIPPING.value
     }
-    rv = client.put('/api/orders/%d' % order.id, data=json.dumps(req), content_type='application/json')
+    rv = client.put('/api/orders/{:d}'.format(order.id), data=json.dumps(req), content_type='application/json')
     assert rv.status_code == 204
     assert order.status == models.OrderStatusEnum.SHIPPING
 
@@ -119,7 +119,7 @@ def test_order_update_404(client, order_factory):
     req = {
         'status': models.OrderStatusEnum.SHIPPING.value
     }
-    rv = client.put('/api/orders/2', data=json.dumps(req), content_type='application/json')
+    rv = client.put('/api/orders/{:d}'.format(order.id+1), data=json.dumps(req), content_type='application/json')
     assert rv.status_code == 404
     assert expected_404 == json.loads(rv.data)
 

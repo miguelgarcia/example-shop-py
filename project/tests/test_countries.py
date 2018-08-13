@@ -7,7 +7,7 @@ def test_get(client, country_factory):
     """ Retrieve one country """
     country1 = country_factory.create()
     country2 = country_factory.create()
-    rv = client.get('/api/countries/%d' % country2.id)
+    rv = client.get('/api/countries/{:d}'.format(country2.id))
     data = json.loads(rv.data)
     expected = model_to_dict(country2, ['name', 'id'])
     assert expected == data
@@ -15,7 +15,7 @@ def test_get(client, country_factory):
 def test_get_404(client, country_factory):
     """ Try to retrieve a non existing country """
     country = country_factory.create()
-    rv = client.get('/api/countries/%d' % (country.id + 1))
+    rv = client.get('/api/countries/{:d}'.format(country.id + 1))
     data = json.loads(rv.data)
     assert rv.status_code == 404
     assert expected_404 == data
@@ -43,8 +43,8 @@ def test_country_post(client, db_session):
     req = { 'name': 'country 1' }
     rv = client.post('/api/countries', data=json.dumps(req), content_type='application/json')
     assert rv.status_code == 201
-    assert int(rv.data) == 1
-    country = models.Country.query.get(1)
+    created_id = int(rv.data)
+    country = models.Country.query.get(created_id)
     assert country is not None
     assert model_to_dict(country, ['name']) == req
 
@@ -54,15 +54,14 @@ def test_country_post_unique(client, country_factory):
     req = """ { "name": "%s" } """ % country.name
     rv = client.post('/api/countries', data=req, content_type='application/json')
     assert rv.status_code == 400
-    data = json.loads(rv.data)
-    assert expected_integrity_error == data
+    assert expected_integrity_error == json.loads(rv.data)
 
 def test_country_update(client, country_factory):
     """ Update a country """
     country = country_factory.create()
     new_name = country.name + "X"
     req = """ { "name": "%s" } """ % new_name
-    rv = client.put('/api/countries/%d' % country.id, data=req, content_type='application/json')
+    rv = client.put('/api/countries/{:d}'.format(country.id), data=req, content_type='application/json')
     assert rv.status_code == 204
     assert country.name == new_name
 
@@ -71,24 +70,21 @@ def test_country_update_404(client, country_factory):
     country = country_factory.create()
     new_name = country.name + "X"
     req = """ { "name": "%s" } """ % new_name
-    rv = client.put('/api/countries/2', data=req, content_type='application/json')
+    rv = client.put('/api/countries/{:d}'.format(country.id+1), data=req, content_type='application/json')
     assert rv.status_code == 404
-    data = json.loads(rv.data)
-    assert expected_404 == data
+    assert expected_404 == json.loads(rv.data)
 
 def test_country_delete(client, country_factory):
     """ Delete a country """
     country = country_factory.create()
     id = country.id
-    rv = client.delete('/api/countries/%d' % country.id)
+    rv = client.delete('/api/countries/{:d}'.format(country.id))
     assert rv.status_code == 204
     assert models.Country.query.get(id) is None
 
 def test_country_delete_404(client, country_factory):
     """ Try to delete a non existing country """
     country = country_factory.create()
-    id = country.id
-    rv = client.delete('/api/countries/2')
+    rv = client.delete('/api/countries/{:d}'.format(country.id+1))
     assert rv.status_code == 404
-    data = json.loads(rv.data)
-    assert expected_404 == data
+    assert expected_404 == json.loads(rv.data)

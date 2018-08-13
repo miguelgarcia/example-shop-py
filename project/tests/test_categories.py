@@ -7,7 +7,7 @@ def test_get(client, category_factory):
     """ Retrieve one category """
     category1 = category_factory.create()
     category2 = category_factory.create()
-    rv = client.get('/api/categories/%d' % category2.id)
+    rv = client.get('/api/categories/{:d}'.format(category2.id))
     data = json.loads(rv.data)
     expected = model_to_dict(category2, ['name', 'id'])
     assert expected == data
@@ -15,7 +15,7 @@ def test_get(client, category_factory):
 def test_get_404(client, category_factory):
     """ Try to retrieve a non existing category """
     category = category_factory.create()
-    rv = client.get('/api/categories/%d' % (category.id + 1))
+    rv = client.get('/api/categories/{:d}'.format(category.id + 1))
     data = json.loads(rv.data)
     assert rv.status_code == 404
     assert expected_404 == data
@@ -43,8 +43,8 @@ def test_category_post(client, db_session):
     req = { 'name': 'category 1' }
     rv = client.post('/api/categories', data=json.dumps(req), content_type='application/json')
     assert rv.status_code == 201
-    assert int(rv.data) == 1
-    category = models.Category.query.get(1)
+    created_id = int(rv.data)
+    category = models.Category.query.get(created_id)
     assert category is not None
     assert model_to_dict(category, ['name']) == req
 
@@ -62,7 +62,7 @@ def test_category_update(client, category_factory):
     category = category_factory.create()
     new_name = category.name + "X"
     req = """ { "name": "%s" } """ % new_name
-    rv = client.put('/api/categories/%d' % category.id, data=req, content_type='application/json')
+    rv = client.put('/api/categories/{:d}'.format(category.id), data=req, content_type='application/json')
     assert rv.status_code == 204
     assert category.name == new_name
 
@@ -71,35 +71,33 @@ def test_category_update_404(client, category_factory):
     category = category_factory.create()
     new_name = category.name + "X"
     req = """ { "name": "%s" } """ % new_name
-    rv = client.put('/api/categories/2', data=req, content_type='application/json')
+    rv = client.put('/api/categories/{:d}'.format(category.id+1), data=req, content_type='application/json')
     assert rv.status_code == 404
-    data = json.loads(rv.data)
-    assert expected_404 == data
+    assert expected_404 == json.loads(rv.data)
 
 def test_category_delete(client, category_factory):
     """ Delete a category """
     category = category_factory.create()
     id = category.id
-    rv = client.delete('/api/categories/%d' % category.id)
+    rv = client.delete('/api/categories/{:d}'.format(category.id))
     assert rv.status_code == 204
     assert models.Category.query.get(id) is None
 
 def test_category_delete_404(client, category_factory):
     """ Try to delete a non existing category """
     category = category_factory.create()
-    id = category.id
-    rv = client.delete('/api/categories/2')
+    rv = client.delete('/api/categories/{:d}'.format(category.id + 1))
     assert rv.status_code == 404
-    data = json.loads(rv.data)
-    assert expected_404 == data
+    assert expected_404 == json.loads(rv.data)
 
 def test_category_delete_used(client, product_factory, db_session):
     """ Delete a category """
     product = product_factory.create()
-    rv = client.delete('/api/categories/%d' % product.category.id)
+    product_id = product.id
+    category_id = product.category.id
+    rv = client.delete('/api/categories/{:d}'.format(category_id))
     assert rv.status_code == 400
-    data = json.loads(rv.data)
-    assert expected_integrity_error == data
+    assert expected_integrity_error == json.loads(rv.data)
     db_session.expunge_all()
-    product = models.Product.query.get(1)
-    assert product.category.id == 1
+    product = models.Product.query.get(product_id)
+    assert product.category.id == category_id

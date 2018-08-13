@@ -99,7 +99,7 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(50), nullable=False, unique=True)
     description = db.Column(db.UnicodeText())
-    price = db.Column(db.Numeric(precision=2, asdecimal=True))
+    price = db.Column(db.Numeric(10, 2, asdecimal=True))
     category_id = db.Column(db.Integer, db.ForeignKey(
         'category.id'), nullable=False)
     category = db.relationship('Category', backref=db.backref(
@@ -162,7 +162,7 @@ class OrderDetail(db.Model):
         'product.id'), nullable=False)
     product = db.relationship('Product', backref=db.backref(
         'orders_details'), lazy='joined')
-    unit_price = db.Column(db.Numeric(precision=2, asdecimal=True))
+    unit_price = db.Column(db.Numeric(10, 2, asdecimal=True))
     quantity = db.Column(db.Integer, nullable=False)
 
     @hybrid_property
@@ -182,6 +182,8 @@ class Order(db.Model):
     def __init__(self, *arg, **kw):
         super().__init__(*arg, **kw)
         self.created_at = datetime.datetime.now()
+        if 'status' not in kw:
+            self.status = OrderStatusEnum.PENDING
 
     @hybrid_property
     def total(self):

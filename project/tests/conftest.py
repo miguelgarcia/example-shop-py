@@ -5,9 +5,6 @@ from project.server import app as _app
 from project.settings import db
 from .factories import *
 
-TESTDB = 'simple-shop_test.db'
-TESTDB_PATH = "/tmp/{}".format(TESTDB)
-
 @pytest.fixture
 def client(app):
     return app.test_client()

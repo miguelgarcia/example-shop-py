@@ -18,7 +18,7 @@ def test_get(client, product_factory):
     """ Retrieve one product """
     product1 = product_factory.create()
     product2 = product_factory.create()
-    rv = client.get('/api/products/%d' % product2.id)
+    rv = client.get('/api/products/{:d}'.format(product2.id))
     data = json.loads(rv.data)
     assert product_to_dict(product2) == data
 
@@ -62,11 +62,11 @@ def test_product_post(client, category_factory, product_factory, tag_factory):
     }    
     rv = client.post('/api/products', data=json.dumps(req), content_type='application/json')
     assert rv.status_code == 201
-    assert int(rv.data) == 1
-    product = models.Product.query.get(1)
+    created_id = int(rv.data)
+    product = models.Product.query.get(created_id)
     assert product is not None
     expect = req
-    expect['id'] = 1
+    expect['id'] = created_id
     expect['category'] = model_to_dict(category, ['id', 'name'])
     assert product_to_dict(product) == expect
 
@@ -90,10 +90,10 @@ def test_product_update(client, product_factory, category_factory):
     req['name'] = 'new name'
     req['tags'] = ['other tag', 'other 2']
     req['category'] = new_category.id
-    rv = client.put('/api/products/%d' % product.id, data=json.dumps(req), content_type='application/json')
+    rv = client.put('/api/products/{:d}'.format(product.id), data=json.dumps(req), content_type='application/json')
     assert rv.status_code == 204
     expect = req
-    expect['id'] = 1
+    expect['id'] = product.id
     expect['category'] = model_to_dict(new_category, ['id', 'name'])
     assert product_to_dict(product) == expect
 
@@ -103,7 +103,7 @@ def test_product_update_404(client, product_factory):
     req = product_to_dict(product)
     del req['id']
     req['category'] = product.category.id
-    rv = client.put('/api/products/2', data=json.dumps(req), content_type='application/json')
+    rv = client.put('/api/products/{:d}'.format(product.id+1), data=json.dumps(req), content_type='application/json')
     assert rv.status_code == 404
     data = json.loads(rv.data)
     assert expected_404 == data
@@ -112,15 +112,14 @@ def test_product_delete(client, product_factory):
     """ Delete a product """
     product = product_factory.create()
     id = product.id
-    rv = client.delete('/api/products/%d' % product.id)
+    rv = client.delete('/api/products/{:d}'.format(product.id))
     assert rv.status_code == 204
     assert models.Product.query.get(id) is None
 
-def test_product_adelete_404(client, product_factory):
+def test_product_delete_404(client, product_factory):
     """ Try to delete a non existing product """
     product = product_factory.create()
-    id = product.id
-    rv = client.delete('/api/products/2')
+    rv = client.delete('/api/products/{:d}'.format(product.id+1))
     assert rv.status_code == 404
     data = json.loads(rv.data)
     assert expected_404 == data

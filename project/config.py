@@ -16,7 +16,7 @@ class TestingConfig(BaseConfig):
     """Testing configuration."""
     DEBUG = True
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/simple-shop_test.db'
+    SQLALCHEMY_DATABASE_URI = os.getenv('TEST_DATABASE_URL', 'sqlite:////tmp/simple-shop_test.db')
 
 class ProductionConfig(BaseConfig):
     """Production configuration."""

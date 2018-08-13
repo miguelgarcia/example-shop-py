@@ -106,11 +106,6 @@ class OrderCreateSchema(ma.ModelSchema):
     customer = ma.Function(deserialize=lambda v: models.Customer.query.get(v), required=True, validate=[validate.NoneOf([None])])
     detail = ma.Nested(OrderDetailCreateSchema, many=True)
 
-    @post_load
-    def load_detail(self, data):
-        data['status'] = models.OrderStatusEnum.PENDING
-        return data
-
 class OrderUpdateSchema(ma.ModelSchema):
     class Meta:
         model = models.Order
