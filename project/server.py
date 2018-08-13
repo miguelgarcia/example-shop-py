@@ -1,13 +1,9 @@
-import logging
-import os
-from project.settings import app, db, ma, migrate
+from project.settings import app, db
 from flask import jsonify
-import project.models
 from .restapi import api
-logger = logging.getLogger(__name__)
 
 app.register_blueprint(api, url_prefix='/api')
-print("server")
+
 @app.route('/help', methods=['GET'])
 def help():
     """Print available functions."""
@@ -17,10 +13,31 @@ def help():
             func_list[rule.rule] = app.view_functions[rule.endpoint].__doc__
     return jsonify(func_list)
 
-from flask import Flask
 
 @app.cli.command()
 def populate_db():
-    """ Populates the database with generated data """
+    """ Populates the database with random data """
     import project.tests.factories as factories
-    factories.category_factory(db.session).create_batch(10)
+    import random
+    from project.models import Order, OrderStatusEnum
+
+    categories = factories.category_factory(db.session).create_batch(20)
+    customers = factories.customer_factory(db.session).create_batch(30)
+    products = []
+    products_factory = factories.product_factory(db.session)
+    tags = factories.tag_factory(db.session).create_batch(10)
+    for _ in range(50):
+        products.append(products_factory.create(
+            category=random.choice(categories),
+            tags=[t.name for t in random.sample(tags, random.randint(1,4))]
+        ))
+    orders_factory = factories.order_factory(db.session)
+    for _ in range(50):
+        order = orders_factory.create(
+            customer=random.choice(customers),
+            status=random.choice(list(OrderStatusEnum))
+        )
+        order_products = random.sample(products, random.randint(1,5))
+        for p in order_products:
+            order.add_product(p, random.randint(1,10))
+    

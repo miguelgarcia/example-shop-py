@@ -59,6 +59,7 @@ class OrderDetailSchema(ma.ModelSchema):
     product = ma.Nested(ProductSchema, only=('id', 'name'))
     unit_price = ma.Decimal(as_string=True,places=2)
 
+
 class OrderSchema(ma.ModelSchema):
     class Meta:
         model = models.Order

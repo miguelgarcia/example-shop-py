@@ -1,12 +1,15 @@
 import os
 
+full_path = os.path.realpath(__file__)
+path, filename = os.path.split(full_path)
+
 class BaseConfig:
     """Base configuration."""
     SECRET_KEY = os.getenv('SECRET_KEY', 'my_secret')
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///../simple-shop.db'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + path + '/simple-shop.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    #SQLALCHEMY_ECHO = True
+    SQLALCHEMY_ECHO = True
 
 class DevelopmentConfig(BaseConfig):
     """Development configuration."""

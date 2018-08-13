@@ -9,7 +9,7 @@ from .views import (CategoriesView, CountriesView, CustomersView, OrdersView,
 api = Blueprint('api', __name__)
 
 def register_crud_view(view_class, plural, list_methods=['GET', 'POST'], record_methods=['GET', 'PUT', 'DELETE']):
-    view = view_class.as_view(plural+'_view', session=db.session)
+    view = view_class.as_view(plural, session=db.session)
     if 'GET' in list_methods:
         api.add_url_rule('/%s' % plural, defaults={'id': None},
                     view_func=view, methods=['GET',])

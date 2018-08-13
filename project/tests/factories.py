@@ -47,6 +47,9 @@ class ProductFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     @factory.post_generation
     def tags(self, create, extracted, **kwargs):
+        if extracted is not None:
+            self.tags = extracted
+            return
         a_tag_factory = tag_factory(ProductFactory._meta.sqlalchemy_session)
         for _ in range(2):
             tag = a_tag_factory.create()
