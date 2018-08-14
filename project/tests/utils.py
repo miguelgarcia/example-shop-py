@@ -43,6 +43,12 @@ def model_to_dict(model, fields):
     return ret
 
 
+def category_to_dict(category, fields=None):
+    if fields is None:
+        fields = ['id', 'name']
+    return model_to_dict(category, fields)
+
+
 expected_404 = {
     'status': 404,
     'message': 'Not found'

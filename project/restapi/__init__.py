@@ -1,15 +1,21 @@
-from flask import Blueprint, jsonify
+from flask import jsonify
 from marshmallow.exceptions import ValidationError
-from project.settings import db
-from .views import (CategoriesView, CountriesView, CustomersView, OrdersView,
-                    ProductsView)
 
-api = Blueprint('api', __name__)
+from .blueprint import api
+from .cruds import (CategoriesView, CountriesView, CustomersView, OrdersView,
+                    ProductsView)
+from . import statistics    # noqa: F401
 
 
 def register_crud_view(view_class, plural, list_methods=['GET', 'POST'],
                        record_methods=['GET', 'PUT', 'DELETE']):
-    view = view_class.as_view(plural, session=db.session)
+    """ Register routes endpoints for a CRUD
+        /plural
+        /plural/<int:id>
+
+        Allowed methods can be configured using list_methods and record_methods
+    """
+    view = view_class.as_view(plural)
     if 'GET' in list_methods:
         api.add_url_rule('/%s' % plural, defaults={'id': None},
                          view_func=view, methods=['GET', ])
@@ -29,3 +35,6 @@ register_crud_view(OrdersView, 'orders', record_methods=['GET', 'PUT'])
 @api.errorhandler(ValidationError)
 def schema_violation_exception_handler(error):
     return jsonify({'status': 422, 'message': str(error)}), 422
+
+
+__all__ = ['api']

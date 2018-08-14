@@ -1,6 +1,6 @@
 from project.models import Category, Country, Customer, Order, Product
 
-from .crudview import CrudView
+from .basecrudview import CrudView
 from .schemas import (CategorySchema, CountrySchema, CustomerDeserializeSchema,
                       CustomerSchema, OrderCreateSchema, OrderSchema,
                       OrdersListSchema, OrderUpdateSchema,

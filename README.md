@@ -33,16 +33,15 @@ Besides CRUD functionality the API will also exposes statistics, produced with c
     python3 -m venv venv
     . ./venv/bin/activate
     pip install -r requirements.txt
-    export FLASK_APP=project.server
-    flask db upgrade
-    flask db populate_db
+    pip install -e .
+    app db upgrade
+    app db populate_db
 
     
 ## Run
 
     . ./venv/bin/activate
-    export FLASK_APP=project.server
-    flask run
+    app run
     
 ## Run tests
 

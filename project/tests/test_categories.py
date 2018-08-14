@@ -1,6 +1,6 @@
 from flask import json
 from project import models
-from .utils import model_to_dict, expected_404, expected_integrity_error
+from .utils import category_to_dict, expected_404, expected_integrity_error
 
 
 def test_get(client, category_factory):
@@ -9,7 +9,7 @@ def test_get(client, category_factory):
     category2 = category_factory.create()
     rv = client.get('/api/categories/{:d}'.format(category2.id))
     data = json.loads(rv.data)
-    expected = model_to_dict(category2, ['name', 'id'])
+    expected = category_to_dict(category2)
     assert expected == data
 
 
@@ -26,7 +26,7 @@ def test_list(client, category_factory):
     """ List all categories """
     categories = category_factory.create_batch(10)
     rv = client.get('/api/categories')
-    expected = model_to_dict(categories, ['id', 'name'])
+    expected = category_to_dict(categories)
     data = json.loads(rv.data)
     assert sorted(expected, key=lambda c: c['id']) == sorted(
         data, key=lambda c: c['id'])
@@ -36,7 +36,7 @@ def test_list_limit_offset(client, category_factory):
     """ List a range of categories """
     categories = category_factory.create_batch(10)
     rv = client.get('/api/categories?offset=1&limit=3')
-    expected = model_to_dict(categories[1:4], ['id', 'name'])
+    expected = category_to_dict(categories[1:4])
     data = json.loads(rv.data)
     assert sorted(expected, key=lambda c: c['id']) == sorted(
         data, key=lambda c: c['id'])
@@ -54,7 +54,7 @@ def test_category_post(client, db_session):
     created_id = int(rv.data)
     category = models.Category.query.get(created_id)
     assert category is not None
-    assert model_to_dict(category, ['name']) == req
+    assert category_to_dict(category, ['name']) == req
 
 
 def test_category_post_unique(client, category_factory):

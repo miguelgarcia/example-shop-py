@@ -1,4 +1,4 @@
-from project.settings import ma
+from project.app import ma
 from marshmallow import validate, post_load
 from project import models
 
@@ -90,18 +90,15 @@ class OrdersListSchema(OrderSchema):
     class Meta:
         model = models.Order
         fields = ('id', 'created_at', 'status',
-                  'customer')
+                  'customer', 'total')
 
-    # Convert from [(<Order>, total)...]
-    def dump(self, obj, *arg, many=None, **kw):
-        if many:
-            result = []
-            for o in obj:
-                result.append(super().dump(o[0], many=False, *arg, **kw))
-                result[-1]['total'] = '{:.2f}'.format(
-                    o[1]) if o[1] is not None else '0.00'
-            return result
-        return super().dump(o[0], *arg, **kw)
+    status = ma.Function(lambda row: row.Order.status.value)
+
+    @staticmethod
+    def get_attribute(obj, attr, default):
+        if attr == 'total':
+            return obj.total
+        return getattr(obj.Order, attr, default)
 
 
 class OrderDetailCreateSchema(ma.ModelSchema):
@@ -137,3 +134,10 @@ class OrderUpdateSchema(ma.ModelSchema):
     status = ma.Function(deserialize=models.OrderStatusEnum.find,
                          required=True,
                          validate=[validate.NoneOf([None])])
+
+# Statistics schemas
+
+
+class ProductsByCategorySchema(ma.Schema):
+    category = ma.Nested(CategorySchema)
+    count = ma.Integer()

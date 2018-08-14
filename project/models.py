@@ -8,7 +8,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql import label
 
-from project.settings import db
+from project.app import db
 
 
 class ModelEnum(enum.Enum):
@@ -237,7 +237,9 @@ class Order(db.Model):
     @total.expression
     def total(cls):
         return (
-            select([func.sum(OrderDetail.unit_price * OrderDetail.quantity)])
+            select([func.coalesce(func.sum(
+                OrderDetail.unit_price * OrderDetail.quantity), 0
+            )])
             .where(OrderDetail.order_id == cls.id)
             .label('total')
         )

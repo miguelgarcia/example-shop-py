@@ -1,7 +1,7 @@
 import pytest
 
-from project.server import app as _app
-from project.settings import db
+from project.app import create_app
+from project.app import db
 
 pytest_plugins = [
     "project.tests.factories",
@@ -15,6 +15,7 @@ def client(app):
 
 @pytest.fixture(scope='session')
 def app():
+    _app = create_app('project.config.TestingConfig')
     ctx = _app.app_context()
     ctx.push()
     yield _app
