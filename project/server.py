@@ -4,6 +4,7 @@ from .restapi import api
 
 app.register_blueprint(api, url_prefix='/api')
 
+
 @app.route('/help', methods=['GET'])
 def help():
     """Print available functions."""
@@ -19,7 +20,7 @@ def populate_db():
     """ Populates the database with random data """
     import project.tests.factories as factories
     import random
-    from project.models import Order, OrderStatusEnum
+    from project.models import OrderStatusEnum
 
     categories = factories.category_factory(db.session).create_batch(20)
     customers = factories.customer_factory(db.session).create_batch(30)
@@ -29,7 +30,7 @@ def populate_db():
     for _ in range(50):
         products.append(products_factory.create(
             category=random.choice(categories),
-            tags=[t.name for t in random.sample(tags, random.randint(1,4))]
+            tags=[t.name for t in random.sample(tags, random.randint(1, 4))]
         ))
     orders_factory = factories.order_factory(db.session)
     for _ in range(50):
@@ -37,7 +38,6 @@ def populate_db():
             customer=random.choice(customers),
             status=random.choice(list(OrderStatusEnum))
         )
-        order_products = random.sample(products, random.randint(1,5))
+        order_products = random.sample(products, random.randint(1, 5))
         for p in order_products:
-            order.add_product(p, random.randint(1,10))
-    
+            order.add_product(p, random.randint(1, 10))

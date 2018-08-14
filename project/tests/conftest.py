@@ -1,13 +1,17 @@
-import os
 import pytest
 
 from project.server import app as _app
 from project.settings import db
-from .factories import *
+
+pytest_plugins = [
+    "project.tests.factories",
+]
+
 
 @pytest.fixture
 def client(app):
     return app.test_client()
+
 
 @pytest.fixture(scope='session')
 def app():
@@ -15,6 +19,7 @@ def app():
     ctx.push()
     yield _app
     ctx.pop()
+
 
 @pytest.fixture(scope="session")
 def _db(app):

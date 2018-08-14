@@ -13,6 +13,3 @@ app.config.from_object(os.getenv(
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 migrate = Migrate(app, db)
-
-
-

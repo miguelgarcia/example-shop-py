@@ -3,9 +3,11 @@ import sys
 import inflection
 import factory
 
+
 def get_factory_name(factory_class):
     """Get factory fixture name by factory."""
     return inflection.underscore(factory_class.__name__)
+
 
 def make_fixture(cls):
     def _update_session(factory_class, session):
@@ -17,6 +19,6 @@ def make_fixture(cls):
     def fix_func(db_session):
         _update_session(cls, db_session)
         return cls
-    fixture=pytest.fixture(fix_func)
+    fixture = pytest.fixture(fix_func)
     setattr(sys.modules[cls.__module__], get_factory_name(cls), fixture)
     return cls

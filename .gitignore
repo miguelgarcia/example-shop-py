@@ -1,6 +1,6 @@
 __pycache__/
 .vscode
-venv/
+venv
 *.pyc
 .pytest_cache
 *.db

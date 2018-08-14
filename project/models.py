@@ -2,13 +2,21 @@ import datetime
 import decimal
 import enum
 
-from flask_sqlalchemy import BaseQuery, SQLAlchemy
+from flask_sqlalchemy import BaseQuery
 from sqlalchemy import func, select
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql import label
 
 from project.settings import db
+
+
+class ModelEnum(enum.Enum):
+    @classmethod
+    def find(cls, name):
+        if name in cls.__members__:
+            return cls[name]
+        return None
 
 
 class Category(db.Model):
@@ -32,10 +40,20 @@ class Category(db.Model):
 
     query_class = CategoryQuery
 
+
 class CategoriesManager:
     @staticmethod
     def count_all_products():
-        return db.session.query(Category, label('count', func.count(Product.id))).outerjoin(Category.products).group_by(Category.id).order_by(Category.id).all()
+        return (
+            db.session.query(
+                Category,
+                label('count', func.count(Product.id))
+            )
+            .outerjoin(Category.products)
+            .group_by(Category.id)
+            .order_by(Category.id)
+            .all()
+        )
 
 
 class Country(db.Model):
@@ -56,8 +74,11 @@ class Customer(db.Model):
     country_id = db.Column(db.Integer, db.ForeignKey(
         'country.id'), nullable=False)
     country = db.relationship('Country', backref='customers')
-    orders = db.relationship('Order', backref=db.backref('customer', lazy='joined'),
-                             lazy='dynamic')
+    orders = db.relationship(
+        'Order',
+        backref=db.backref('customer', lazy='joined'),
+        lazy='dynamic'
+    )
 
     class CustomerQuery(BaseQuery):
         def filter_country(self, country):
@@ -88,7 +109,7 @@ class Tag(db.Model):
     query_class = TagQuery
 
 
-class ProductStatusEnum(enum.Enum):
+class ProductStatusEnum(ModelEnum):
     ACTIVE = 'ACTIVE'
     INACTIVE = 'INACTIVE'
     COMING_SOON = 'COMING_SOON'
@@ -100,52 +121,76 @@ class Product(db.Model):
     name = db.Column(db.Unicode(50), nullable=False, unique=True)
     description = db.Column(db.UnicodeText())
     price = db.Column(db.Numeric(10, 2, asdecimal=True))
-    category_id = db.Column(db.Integer, db.ForeignKey(
-        'category.id'), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'),
+                            nullable=False)
     category = db.relationship('Category', backref=db.backref(
         'products', lazy='dynamic'), lazy='select')
     status = db.Column(
-        db.Enum(ProductStatusEnum, validate_strings=True), nullable=False)
-
-    rel_tags = db.relationship('Tag', secondary='product_tag', backref='products')
+        db.Enum(ProductStatusEnum, validate_strings=True),
+        nullable=False
+    )
+    rel_tags = db.relationship('Tag', secondary='product_tag',
+                               backref='products')
     tags = association_proxy(
-        'rel_tags', 'name', creator=lambda name: Tag.query.get_or_create(name=name))
+        'rel_tags', 'name',
+        creator=lambda name: Tag.query.get_or_create(name=name)
+    )
     category_name = association_proxy(
-        'category', 'name', creator=lambda name: Category.query.get_or_create(name=name))
+        'category', 'name',
+        creator=lambda name: Category.query.get_or_create(name=name)
+    )
 
     def __repr__(self):
         return '<Product %r>' % self.name
 
     @hybrid_property
     def sells(self):
-        return db.session.query(
-            label('count', func.sum(OrderDetail.quantity))
-        ).filter(OrderDetail.product == self).scalar()
+        return (
+            db.session.query(label('count', func.sum(OrderDetail.quantity)))
+            .filter(OrderDetail.product == self).scalar()
+        )
+
 
 class ProductsManager:
     @staticmethod
     def sells_by_product():
-        return db.session.query(Product, label('sells', func.sum(OrderDetail.quantity))
-        ).outerjoin(Product.orders_details).group_by(Product.id).all()
+        """ Returns a list of (Product, sells) """
+        return (
+            db.session.query(
+                Product,
+                label('sells', func.sum(OrderDetail.quantity))
+            )
+            .outerjoin(Product.orders_details).group_by(Product.id).all()
+        )
 
     @staticmethod
     def units_delivered_by_product_by_country():
-        return db.session.query(Product, Country, label('units', func.sum(OrderDetail.quantity))
-            ).outerjoin(Product.orders_details
-            ).outerjoin(OrderDetail.order
-            ).outerjoin(Order.customer
-            ).filter(Order.status==OrderStatusEnum.DELIVERED
-            ).outerjoin(Customer.country
-            ).group_by(Product.id, Country.id).all()
+        """ Returns a list a of (Product, Country, units)
+            containing the amount of units delivered to each country for each
+            product
+        """
+        return (
+            db.session.query(
+                Product, Country,
+                label('units', func.sum(OrderDetail.quantity))
+            )
+            .outerjoin(Product.orders_details)
+            .outerjoin(OrderDetail.order)
+            .outerjoin(Order.customer)
+            .filter(Order.status == OrderStatusEnum.DELIVERED)
+            .outerjoin(Customer.country)
+            .group_by(Product.id, Country.id).all()
+        )
 
 
 class ProductTag(db.Model):
     __tablename__ = 'product_tag'
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey(
+        'product.id'), primary_key=True)
     tag_id = db.Column(db.Integer, db.ForeignKey('tag.id'), primary_key=True)
 
 
-class OrderStatusEnum(enum.Enum):
+class OrderStatusEnum(ModelEnum):
     PENDING = 'PENDING'
     PAYED = 'PAYED'
     SHIPPING = 'SHIPPING'
@@ -158,10 +203,10 @@ class OrderDetail(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
     order = db.relationship('Order', backref='detail')
-    product_id = db.Column(db.Integer, db.ForeignKey(
-        'product.id'), nullable=False)
-    product = db.relationship('Product', backref=db.backref(
-        'orders_details'), lazy='joined')
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'),
+                           nullable=False)
+    product = db.relationship('Product', backref=db.backref('orders_details'),
+                              lazy='joined')
     unit_price = db.Column(db.Numeric(10, 2, asdecimal=True))
     quantity = db.Column(db.Integer, nullable=False)
 
@@ -173,10 +218,10 @@ class OrderDetail(db.Model):
 class Order(db.Model):
     __tablename__ = 'order'
     id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer, db.ForeignKey(
-        'customer.id'), nullable=False)
-    status = db.Column(
-        db.Enum(OrderStatusEnum, validate_strings=True), nullable=False)
+    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'),
+                            nullable=False)
+    status = db.Column(db.Enum(OrderStatusEnum, validate_strings=True),
+                       nullable=False)
     created_at = db.Column(db.DateTime, nullable=False)
 
     def __init__(self, *arg, **kw):
@@ -191,10 +236,11 @@ class Order(db.Model):
 
     @total.expression
     def total(cls):
-        return select([func.sum(OrderDetail.unit_price * OrderDetail.quantity)]).\
-                where(OrderDetail.order_id==cls.id).\
-                label('total')
-
+        return (
+            select([func.sum(OrderDetail.unit_price * OrderDetail.quantity)])
+            .where(OrderDetail.order_id == cls.id)
+            .label('total')
+        )
 
     def add_product(self, product, quantity):
         self.detail.append(OrderDetail(
@@ -206,7 +252,14 @@ class Order(db.Model):
     def __repr__(self):
         return '<Order %r>' % self.id
 
+
 class OrdersManager:
     @staticmethod
     def count_by_status():
-        return db.session.query(Order.status, label('count', func.count(Order.id))).group_by(Order.status).all()
+        """ Returns a list of (OrderStatusEnum, count) containing how many
+            orders are currently in each state
+        """
+        return db.session.query(
+                Order.status,
+                label('count', func.count(Order.id))
+            ).group_by(Order.status).all()
