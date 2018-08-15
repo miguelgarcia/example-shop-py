@@ -1,6 +1,6 @@
 from flask import json
 from project import models
-from .utils import model_to_dict, expected_404, expected_integrity_error
+from .utils import country_to_dict, expected_404, expected_integrity_error
 
 
 def test_get(client, country_factory):
@@ -9,7 +9,7 @@ def test_get(client, country_factory):
     country2 = country_factory.create()
     rv = client.get('/api/countries/{:d}'.format(country2.id))
     data = json.loads(rv.data)
-    expected = model_to_dict(country2, ['name', 'id'])
+    expected = country_to_dict(country2)
     assert expected == data
 
 
@@ -26,7 +26,7 @@ def test_list(client, country_factory):
     """ List all countries """
     countries = country_factory.create_batch(10)
     rv = client.get('/api/countries')
-    expected = model_to_dict(countries, ['id', 'name'])
+    expected = country_to_dict(countries)
     data = json.loads(rv.data)
     assert sorted(expected, key=lambda c: c['id']) == sorted(
         data, key=lambda c: c['id'])
@@ -36,7 +36,7 @@ def test_list_limit_offset(client, country_factory):
     """ List a range of countries """
     countries = country_factory.create_batch(10)
     rv = client.get('/api/countries?offset=1&limit=3')
-    expected = model_to_dict(countries[1:4], ['id', 'name'])
+    expected = country_to_dict(countries[1:4])
     data = json.loads(rv.data)
     assert sorted(expected, key=lambda c: c['id']) == sorted(
         data, key=lambda c: c['id'])
@@ -54,7 +54,7 @@ def test_country_post(client, db_session):
     created_id = int(rv.data)
     country = models.Country.query.get(created_id)
     assert country is not None
-    assert model_to_dict(country, ['name']) == req
+    assert country_to_dict(country, ['name']) == req
 
 
 def test_country_post_unique(client, country_factory):

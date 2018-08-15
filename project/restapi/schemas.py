@@ -101,29 +101,23 @@ class OrdersListSchema(OrderSchema):
         return getattr(obj.Order, attr, default)
 
 
-class OrderDetailCreateSchema(ma.ModelSchema):
-    class Meta:
-        model = models.OrderDetail
-        fields = ('quantity', 'product')
-
+class OrderDetailCreateSchema(ma.Schema):
     product = ma.Function(deserialize=lambda v: models.Product.query.get(
         v), required=True, validate=[validate.NoneOf([None])])
     quantity = ma.Integer(required=True, validate=[validate.Range(1)])
 
-    @post_load
-    def load_price(self, data):
-        data['unit_price'] = data['product'].price
-        return data
 
-
-class OrderCreateSchema(ma.ModelSchema):
-    class Meta:
-        model = models.Order
-        fields = ('customer', 'detail')
-
+class OrderCreateSchema(ma.Schema):
     customer = ma.Function(deserialize=lambda v: models.Customer.query.get(
         v), required=True, validate=[validate.NoneOf([None])])
     detail = ma.Nested(OrderDetailCreateSchema, many=True)
+
+    @post_load
+    def create_order(self, data):
+        order = models.Order(customer=data['customer'])
+        for detail in data['detail']:
+            order.add_product(detail['product'], detail['quantity'])
+        return order
 
 
 class OrderUpdateSchema(ma.ModelSchema):
@@ -140,4 +134,9 @@ class OrderUpdateSchema(ma.ModelSchema):
 
 class ProductsByCategorySchema(ma.Schema):
     category = ma.Nested(CategorySchema)
+    count = ma.Integer()
+
+
+class CustomersByCountrySchema(ma.Schema):
+    country = ma.Nested(CountrySchema)
     count = ma.Integer()

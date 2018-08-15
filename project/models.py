@@ -4,6 +4,7 @@ import enum
 
 from flask_sqlalchemy import BaseQuery
 from sqlalchemy import func, select
+from sqlalchemy.orm import aliased
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql import label
@@ -41,21 +42,6 @@ class Category(db.Model):
     query_class = CategoryQuery
 
 
-class CategoriesManager:
-    @staticmethod
-    def count_all_products():
-        return (
-            db.session.query(
-                Category,
-                label('count', func.count(Product.id))
-            )
-            .outerjoin(Category.products)
-            .group_by(Category.id)
-            .order_by(Category.id)
-            .all()
-        )
-
-
 class Country(db.Model):
     __tablename__ = 'country'
     id = db.Column(db.Integer, primary_key=True)
@@ -88,6 +74,22 @@ class Customer(db.Model):
 
     def __repr__(self):
         return '<Customer %r>' % self.email
+
+
+class CustomersManager:
+    @staticmethod
+    def count_by_country():
+        country = aliased(Country, name='country')
+        return (
+            db.session.query(
+                country,
+                label('count', func.count(Customer.id))
+            )
+            .outerjoin(country.customers)
+            .group_by(country.id)
+            .order_by(country.id)
+            .all()
+        )
 
 
 class Tag(db.Model):
@@ -180,6 +182,21 @@ class ProductsManager:
             .filter(Order.status == OrderStatusEnum.DELIVERED)
             .outerjoin(Customer.country)
             .group_by(Product.id, Country.id).all()
+        )
+
+    @staticmethod
+    def count_by_category():
+        """ Count how many products are in each category """
+        category = aliased(Category, name='category')
+        return (
+            db.session.query(
+                category,
+                label('count', func.count(Product.id))
+            )
+            .outerjoin(category.products)
+            .group_by(category.id)
+            .order_by(category.id)
+            .all()
         )
 
 

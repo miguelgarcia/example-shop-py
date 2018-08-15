@@ -1,10 +1,15 @@
 from .blueprint import api
-from project.models import CategoriesManager
-from .schemas import ProductsByCategorySchema
+from project.models import ProductsManager, CustomersManager
+from .schemas import ProductsByCategorySchema, CustomersByCountrySchema
 
 
 @api.route('/statistics/products_by_category')
 def products_by_category():
-    result = map(lambda row: dict(category=row[0], count=row[1]),
-                 CategoriesManager.count_all_products())
-    return ProductsByCategorySchema(many=True).jsonify(result)
+    return ProductsByCategorySchema(many=True).jsonify(
+        ProductsManager.count_by_category())
+
+
+@api.route('/statistics/customers_by_country')
+def customers_by_country():
+    return CustomersByCountrySchema(many=True).jsonify(
+        CustomersManager.count_by_country())

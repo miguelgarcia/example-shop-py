@@ -1,18 +1,29 @@
 import random
 
-from project.models import (CategoriesManager, Customer, OrdersManager,
+from project.models import (Customer, CustomersManager, OrdersManager,
                             OrderStatusEnum, ProductsManager)
 from sqlalchemy.exc import IntegrityError
 
 
+def test_count_customers_by_country(customer_factory, country_factory):
+    """ Test counting customers in all countries """
+    counts = [random.randint(0, 10) for _ in range(10)]
+    countries = country_factory.create_batch(len(counts))
+    for i in range(len(counts)):
+        customer_factory.create_batch(counts[i], country=countries[i])
+    expected = [(countries[i], counts[i]) for i in range(len(counts))]
+    calc = CustomersManager.count_by_country()
+    assert expected == calc
+
+
 def test_products_count_by_category(product_factory, category_factory):
     """ Test counting products in all categories """
-    counts = [10, 0, 1, 5]
+    counts = [random.randint(0, 10) for _ in range(10)]
     categories = category_factory.create_batch(len(counts))
     for i in range(len(counts)):
         product_factory.create_batch(counts[i], category=categories[i])
     expected = [(categories[i], counts[i]) for i in range(len(counts))]
-    calc = CategoriesManager.count_all_products()
+    calc = ProductsManager.count_by_category()
     assert expected == calc
 
 

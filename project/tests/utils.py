@@ -49,6 +49,12 @@ def category_to_dict(category, fields=None):
     return model_to_dict(category, fields)
 
 
+def country_to_dict(country, fields=None):
+    if fields is None:
+        fields = ['id', 'name']
+    return model_to_dict(country, fields)
+
+
 expected_404 = {
     'status': 404,
     'message': 'Not found'
