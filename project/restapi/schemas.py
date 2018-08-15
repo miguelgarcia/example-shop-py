@@ -140,3 +140,13 @@ class ProductsByCategorySchema(ma.Schema):
 class CustomersByCountrySchema(ma.Schema):
     country = ma.Nested(CountrySchema)
     count = ma.Integer()
+
+
+class OrdersByStatusSchema(ma.Schema):
+    count = ma.Integer()
+    status = ma.Function(lambda row: row.status.value)
+
+
+class SellsByProductSchema(ma.Schema):
+    product = ma.Nested(ProductSchema)
+    sells = ma.Integer()

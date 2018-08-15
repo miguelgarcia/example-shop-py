@@ -55,6 +55,17 @@ def country_to_dict(country, fields=None):
     return model_to_dict(country, fields)
 
 
+def product_to_dict(product):
+    if isinstance(product, collections.Iterable):
+        return [product_to_dict(p) for p in product]
+    d = model_to_dict(product, ['id', 'name', 'description',
+                                ('category', ['id', 'name']), 'tags'])
+    d['status'] = product.status.value
+    d['tags'] = list(product.tags)
+    d['price'] = '{:.2f}'.format(product.price)
+    return d
+
+
 expected_404 = {
     'status': 404,
     'message': 'Not found'

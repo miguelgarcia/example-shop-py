@@ -152,22 +152,36 @@ class Product(db.Model):
             .filter(OrderDetail.product == self).scalar()
         )
 
+    @sells.expression
+    def sells(cls):
+        return (
+            select([func.coalesce(func.sum(
+                OrderDetail.quantity), 0
+            )])
+            .where(OrderDetail.product_id == cls.id)
+            .label('sells')
+        )
+
 
 class ProductsManager:
     @staticmethod
     def sells_by_product():
-        """ Returns a list of (Product, sells) """
-        return (
-            db.session.query(
-                Product,
-                label('sells', func.sum(OrderDetail.quantity))
-            )
-            .outerjoin(Product.orders_details).group_by(Product.id).all()
-        )
+        """ Returns a list of (product, sells) """
+        product = aliased(Product, name='product')
+        return db.session.query(product, product.sells).all()
+        # The next code does the same but uses join instead subquery
+        # return (
+        #     db.session.query(
+        #         product,
+        #         label('sells',
+        #               func.coalesce(func.sum(OrderDetail.quantity), 0))
+        #     )
+        #     .outerjoin(product.orders_details).group_by(product.id).all()
+        # )
 
     @staticmethod
     def units_delivered_by_product_by_country():
-        """ Returns a list a of (Product, Country, units)
+        """ Returns a list a of (product, country, units)
             containing the amount of units delivered to each country for each
             product
         """
@@ -279,6 +293,6 @@ class OrdersManager:
             orders are currently in each state
         """
         return db.session.query(
-                Order.status,
+                label('status', Order.status),
                 label('count', func.count(Order.id))
             ).group_by(Order.status).all()

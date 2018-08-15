@@ -90,23 +90,18 @@ def test_product_sells(order_factory, product_factory):
 
 def test_products_sells_query(order_factory, product_factory):
     """ Test sells count for all products """
-    products = product_factory.create_batch(10)
-    expected = []
-    # For each product create n orders with other products in the detail and
-    # add the product with a random quantity
-    for p in products:
-        total = 0
-        orders = order_factory.create_batch(random.randint(1, 5), details=3)
-        for o in orders:
-            for d in o.detail:
-                expected.append((d.product, d.quantity))
+    products = product_factory.create_batch(20)
+    sells = {p.id: 0 for p in products}
+    for order in order_factory.create_batch(20):
+        for product in random.sample(products, k=random.randint(1, 4)):
             n = random.randint(1, 10)
-            o.add_product(p, n)
-            total += n
-        expected.append((p, total))
-    expected.sort(key=lambda v: v[0].id)
-    result = ProductsManager.sells_by_product()
-    result.sort(key=lambda v: v[0].id)
+            order.add_product(product, n)
+            sells[product.id] += n
+    expected = [{'product': p, 'sells': sells[p.id]} for p in products]
+    expected.sort(key=lambda v: v['product'].id)
+    result = [{'product': r.product, 'sells': r.sells}
+              for r in ProductsManager.sells_by_product()]
+    result.sort(key=lambda v: v['product'].id)
     assert expected == result
 
 

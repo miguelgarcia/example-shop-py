@@ -1,20 +1,8 @@
-import collections
-
 from flask import json
 from project import models
 
-from .utils import expected_404, expected_integrity_error, model_to_dict
-
-
-def product_to_dict(product):
-    if isinstance(product, collections.Iterable):
-        return [product_to_dict(p) for p in product]
-    d = model_to_dict(product, ['id', 'name', 'description',
-                                ('category', ['id', 'name']), 'tags'])
-    d['status'] = product.status.value
-    d['tags'] = list(product.tags)
-    d['price'] = '{:.2f}'.format(product.price)
-    return d
+from .utils import (expected_404, expected_integrity_error, model_to_dict,
+                    product_to_dict)
 
 
 def test_get(client, product_factory):
