@@ -2,7 +2,8 @@ from project.models import CustomersManager, OrdersManager, ProductsManager
 
 from .blueprint import api
 from .schemas import (CustomersByCountrySchema, OrdersByStatusSchema,
-                      ProductsByCategorySchema, SellsByProductSchema)
+                      ProductsByCategorySchema, SellsByProductSchema,
+                      UnitsDeliveredByProductByCountrySchema)
 
 
 @api.route('/statistics/products_by_category')
@@ -27,3 +28,9 @@ def orders_by_status():
 def sells_by_product():
     return SellsByProductSchema(many=True).jsonify(
         ProductsManager.sells_by_product())
+
+
+@api.route('/statistics/units_delivered_by_product_by_country')
+def units_delivered_by_product_by_country():
+    return UnitsDeliveredByProductByCountrySchema(many=True).jsonify(
+        ProductsManager.units_delivered_by_product_by_country())

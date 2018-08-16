@@ -185,18 +185,20 @@ class ProductsManager:
             containing the amount of units delivered to each country for each
             product
         """
-        return (
+        product = aliased(Product, name='product')
+        country = aliased(Customer.country, name='country')
+        q = (
             db.session.query(
-                Product, Country,
+                product, country,
                 label('units', func.sum(OrderDetail.quantity))
             )
-            .outerjoin(Product.orders_details)
+            .outerjoin(product.orders_details)
             .outerjoin(OrderDetail.order)
             .outerjoin(Order.customer)
+            .outerjoin(country)
             .filter(Order.status == OrderStatusEnum.DELIVERED)
-            .outerjoin(Customer.country)
-            .group_by(Product.id, Country.id).all()
-        )
+            .group_by(product.id, country.id))
+        return q.all()
 
     @staticmethod
     def count_by_category():

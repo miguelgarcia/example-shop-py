@@ -150,3 +150,9 @@ class OrdersByStatusSchema(ma.Schema):
 class SellsByProductSchema(ma.Schema):
     product = ma.Nested(ProductSchema)
     sells = ma.Integer()
+
+
+class UnitsDeliveredByProductByCountrySchema(ma.Schema):
+    product = ma.Nested(ProductSchema)
+    country = ma.Nested(CountrySchema)
+    units = ma.Integer()
