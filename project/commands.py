@@ -23,11 +23,15 @@ def populate_db():
     import random
     from project.models import OrderStatusEnum
 
+    countries = factories.CountryFactory.create_batch(10)
+    customers = []
+    for country in countries:
+        customers += factories.CustomerFactory.create_batch(
+            random.randint(1, 10), country=country)
     categories = factories.CategoryFactory.create_batch(20)
-    customers = factories.CustomerFactory.create_batch(30)
-    products = []
     tags = factories.TagFactory.create_batch(10)
-    for _ in range(50):
+    products = []
+    for _ in range(10):
         products.append(factories.ProductFactory.create(
             category=random.choice(categories),
             tags=[t.name for t in random.sample(tags, random.randint(1, 4))]

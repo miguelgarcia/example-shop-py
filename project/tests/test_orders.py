@@ -40,7 +40,7 @@ def test_get_404(client, order_factory):
     assert expected_404 == data
 
 
-def test_orders_list(client, order_factory, db_session):
+def test_orders_list(client, order_factory):
     """ List all orders """
     orders = order_factory.create_batch(10, details=3)
     list_fields = ['id', 'created_at', 'total', 'status',

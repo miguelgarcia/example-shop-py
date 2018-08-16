@@ -3,10 +3,12 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
+from flask_cors import CORS
 
 db = SQLAlchemy()
 ma = Marshmallow()
 migrate = Migrate()
+cors = CORS()
 
 
 def create_app(config_name=None):
@@ -26,6 +28,7 @@ def init_extensions(app):
     db.init_app(app)
     ma.init_app(app)
     migrate.init_app(app, db)
+    cors.init_app(app)
 
 
 def register_blueprints(app):

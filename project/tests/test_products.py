@@ -130,3 +130,20 @@ def test_product_delete_404(client, product_factory):
     assert rv.status_code == 404
     data = json.loads(rv.data)
     assert expected_404 == data
+
+
+def test_product_delete_used(client, product_factory, order_factory,
+                             db_session):
+    """ Delete a product used in an order """
+    product = product_factory.create()
+    order = order_factory.create()
+    order.add_product(product, 1)
+    db_session.commit()
+    order_id = order.id
+    product_id = product.id
+    rv = client.delete('/api/products/{:d}'.format(product_id))
+    assert rv.status_code == 400
+    assert expected_integrity_error == json.loads(rv.data)
+    db_session.expunge_all()
+    order = models.Order.query.get(order_id)
+    assert order.detail[0].product == models.Product.query.get(product_id)

@@ -1,0 +1,1073 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: example-shop-py REST API
+  license:
+    name: MIT
+servers:
+  - url: 'http://localhost:5000/api'
+paths:
+  /statistics/products_by_category:
+    get:
+      summary: List how many products exist in each category
+      operationId: productsByCategory
+      tags:
+        - statistics
+      responses:
+        '200':
+          description: Array of results
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductsByCategory"
+  /statistics/customers_by_country:
+    get:
+      summary: List how many customers exist in each country
+      operationId: customersByCountry
+      tags:
+        - statistics
+      responses:
+        '200':
+          description: Array of results
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CustomersByCountry"
+  /statistics/orders_by_status:
+    get:
+      summary: List how many orders are for each status
+      operationId: ordersByStatus
+      tags:
+        - statistics
+      responses:
+        '200':
+          description: Array of results
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OrdersByStatus"
+  /statistics/sells_by_product:
+    get:
+      summary: List how many units of each product were sell (includes canceled orders)
+      operationId: sellsByProduct
+      tags:
+        - statistics
+      responses:
+        '200':
+          description: Array of results
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SellsByProduct"
+  /statistics/units_delivered_by_product_by_country:
+    get:
+      summary: List how many units of each product were delivered to each country
+      operationId: unitsDeliveredByProductByCountry
+      tags:
+        - statistics
+      responses:
+        '200':
+          description: Array of results
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UnitsDeliveredByProductByCountry"
+  /categories:
+    get:
+      summary: List all categories
+      operationId: listCategories
+      tags:
+        - categories
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: offset
+          in: query
+          description: First item offset (used for pagination)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: A paged array of categories
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+    post:
+      summary: Creates a new category
+      operationId: createCategory
+      tags:
+        - categories
+      requestBody:
+        description: Category to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreate'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: integer
+                description: new category id
+        '400':
+          description: Other error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /categories/{id}:
+    put:
+      summary: Updates one category
+      operationId: updateCategoryById
+      tags:
+        - categories
+      requestBody:
+        description: category new attributes
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdate'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the category to update
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Category updated
+        '404':
+          description: not found error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        '400':
+          description: Other error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Deletes one category
+      operationId: deleteCategoryById
+      tags:
+        - categories
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the category to delete
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Category deleted
+        '404':
+          description: not found error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        '400':
+          description: Other error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      summary: Returns one category
+      operationId: findCategoryById
+      tags:
+        - categories
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the category to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        '404':
+          description: not found error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /products:
+    get:
+      summary: List all products
+      operationId: listProducts
+      tags:
+        - products
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: offset
+          in: query
+          description: First item offset (used for pagination)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: A paged array of products
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      summary: Creates a new product
+      operationId: createProduct
+      tags:
+        - products
+      requestBody:
+        description: Product to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCreate'
+      responses:
+        '201':
+          description: Success
+        '400':
+          description: Other error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /products/{id}:
+    put:
+      summary: Updates one product
+      operationId: updateProductById
+      tags:
+        - products
+      requestBody:
+        description: product new attributes
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpdate'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the product to update
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Product updated
+        '404':
+          description: not found error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        '400':
+          description: Other error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Deletes one product
+      operationId: deleteProductById
+      tags:
+        - products
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the product to delete
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Product deleted
+        '404':
+          description: not found error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        '400':
+          description: Other error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      summary: Returns one product
+      operationId: findProductById
+      tags:
+        - products
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the product to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        '404':
+          description: not found error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /countries:
+    get:
+      summary: List all countries
+      operationId: listCountries
+      tags:
+        - countries
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: offset
+          in: query
+          description: First item offset (used for pagination)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: A paged array of countries
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Country"
+    post:
+      summary: Creates a new country
+      operationId: createCountry
+      tags:
+        - countries
+      requestBody:
+        description: Country to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CountryCreate'
+      responses:
+        '201':
+          description: Success
+        '400':
+          description: Other error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /countries/{id}:
+    put:
+      summary: Updates one country
+      operationId: updateCountryById
+      tags:
+        - countries
+      requestBody:
+        description: country new attributes
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CountryUpdate'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the country to update
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Country updated
+        '404':
+          description: not found error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        '400':
+          description: Other error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Deletes one country
+      operationId: deleteCountryById
+      tags:
+        - countries
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the country to delete
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Country deleted
+        '404':
+          description: not found error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        '400':
+          description: Other error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      summary: Returns one country
+      operationId: findCountryById
+      tags:
+        - countries
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the country to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested country
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Country"
+        '404':
+          description: not found error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /customers:
+    get:
+      summary: List all customers
+      operationId: listCustomers
+      tags:
+        - customers
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: offset
+          in: query
+          description: First item offset (used for pagination)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: A paged array of customers
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Customer"
+    post:
+      summary: Creates a new customer
+      operationId: createCustomer
+      tags:
+        - customers
+      requestBody:
+        description: Customer to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerCreate'
+      responses:
+        '201':
+          description: Success
+        '400':
+          description: Other error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /customers/{id}:
+    put:
+      summary: Updates one customer
+      operationId: updateCustomerById
+      tags:
+        - customers
+      requestBody:
+        description: customer new attributes
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerUpdate'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the customer to update
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Customer updated
+        '404':
+          description: not found error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        '400':
+          description: Other error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Deletes one customer
+      operationId: deleteCustomerById
+      tags:
+        - customers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the customer to delete
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Customer deleted
+        '404':
+          description: not found error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        '400':
+          description: Other error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      summary: Returns one customer
+      operationId: findCustomerById
+      tags:
+        - customers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the customer to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        '404':
+          description: not found error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /orders:
+    get:
+      summary: List all orders
+      operationId: listOrders
+      tags:
+        - orders
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: offset
+          in: query
+          description: First item offset (used for pagination)
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: A paged array of orders
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:    
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OrderForList"
+    post:
+      summary: Creates a new order
+      operationId: createOrder
+      tags:
+        - orders
+      requestBody:
+        description: Order to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreate'
+      responses:
+        '201':
+          description: Success
+        '400':
+          description: Other error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /orders/{id}:
+    put:
+      summary: Updates one order
+      operationId: updateOrderById
+      tags:
+        - orders
+      requestBody:
+        description: order new attributes
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderUpdate'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the order to update
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Order updated
+        '404':
+          description: not found error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        '400':
+          description: Other error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Deletes one order
+      operationId: deleteOrderById
+      tags:
+        - orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the order to delete
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Order deleted
+        '404':
+          description: not found error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        '400':
+          description: Other error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      summary: Returns one order
+      operationId: findOrderById
+      tags:
+        - orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the order to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: The requested order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        '404':
+          description: not found error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    Category:
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    CategoryCreate:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    CategoryUpdate:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    Product:
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        tags:
+          type: array
+          items:
+            type: string
+        price:
+          type: number
+    ProductUpdate:
+      required:
+        - name
+        - description
+        - category
+        - tags
+        - price
+        - status
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          description: ACTIVE, INACTIVE, COMING_SOON
+        category:
+          type: integer
+          description: category id
+        tags:
+          type: array
+          items:
+            type: string
+        price:
+          type: number
+    ProductCreate:
+      required:
+        - name
+        - description
+        - category
+        - tags
+        - price
+        - status
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          description: ACTIVE, INACTIVE, COMING_SOON
+        category:
+          type: integer
+          description: category id
+        tags:
+          type: array
+          items:
+            type: string
+        price:
+          type: number
+    Country:
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    CountryCreate:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    CountryUpdate:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    Customer:
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        firstname:
+          type: string
+        lastname:
+          type: string
+        country:
+          $ref: '#/components/schemas/Country'
+    CustomerCreate:
+      required:
+        - email
+        - firstname
+        - lastname
+        - country
+      properties:
+        email:
+          type: string
+          format: email
+        firstname:
+          type: string
+        lastname:
+          type: string
+        country:
+          type: integer
+          description: country id
+    CustomerUpdate:
+      required:
+        - email
+        - firstname
+        - lastname
+        - country
+      properties:
+        email:
+          type: string
+          format: email
+        firstname:
+          type: string
+        lastname:
+          type: string
+        country:
+          type: integer
+          description: country id
+    OrderForList:
+      properties:
+        id:
+          type: integer
+        created_at:
+          type: string
+          format: datetime
+        total:
+          type: number
+        status:
+          type: string
+        customer:
+          $ref: '#/components/schemas/Customer'
+    Order:
+      properties:
+        id:
+          type: integer
+        created_at:
+          type: string
+          format: datetime
+        total:
+          type: number
+        status:
+          type: string
+        customer:
+          $ref: '#/components/schemas/Customer'
+        detail:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderDetail'
+    OrderDetail:
+      properties:
+        id:
+          type: integer
+        product:
+          $ref: '#/components/schemas/OrderDetailProduct'
+        quantity:
+          type: integer
+        unit_price:
+          type: number
+    OrderDetailProduct:
+      properties:
+        id:
+          type: integer
+        name:
+          type: integer
+    OrderCreate:
+      required:
+        - customer
+        - detail
+      properties:
+        customer:
+          type: integer
+          description: customer id
+        detail:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderDetailCreate'
+    OrderDetailCreate:
+      required:
+        - product
+        - quantity
+      properties:
+        product:
+          type: integer
+          description: product id
+        quantity:
+          type: integer
+    OrderUpdate:
+      required:
+        - status
+      properties:
+        status:
+          type: string
+    ProductsByCategory:
+      properties:
+        category:
+          $ref: '#/components/schemas/Category'
+        count:
+          type: integer
+    CustomersByCountry:
+      properties:
+        country:
+          $ref: '#/components/schemas/Country'
+        count:
+          type: integer
+    OrdersByStatus:
+      properties:
+        status:
+          type: string
+        count:
+          type: integer
+    SellsByProduct:
+      properties:
+        country:
+          $ref: '#/components/schemas/Product'
+        sells:
+          type: integer
+    UnitsDeliveredByProductByCountry:
+      properties:
+        product_name:
+          type: string
+        product_id:
+          type: integer
+        country_name:
+          type: string
+        country_id:
+          type: integer
+        units:
+          type: integer
+    Error:
+      properties:
+        status:
+          type: integer
+        message:
+          type: string

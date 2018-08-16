@@ -13,7 +13,7 @@ This is a demo project that implements a REST API for a "pretty simple shop" usi
 - CircleCI
 - Flake8
 
-Besides CRUD functionality the API will also exposes statistics, produced with custom SQLAlchemy queries
+Besides CRUD functionality the API also exposes statistics, produced with custom SQLAlchemy queries
 
 - Products count by category
 - Customers count by country
@@ -21,10 +21,9 @@ Besides CRUD functionality the API will also exposes statistics, produced with c
 - Products sells
 - Units delivered by product by country
 
-# TODO
 
-- Implement statistics API
-- OpenAPI YAML Spec
+Complete REST api documentation can be found in the `openapi.yaml` file.
+
 - Model diagram
 - Dockerize
 

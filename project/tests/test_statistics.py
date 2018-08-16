@@ -95,8 +95,10 @@ def test_units_delivered_by_product_by_country_api(
         order.add_product(product, random.randint(1, 10))
     expected = [
             {
-                'product': product_to_dict(r.product),
-                'country': country_to_dict(r.country),
+                'product_name': r.product_name,
+                'product_id': r.product_id,
+                'country_name': r.country_name,
+                'country_id': r.country_id,
                 'units': r.units
             }
             for r in ProductsManager.units_delivered_by_product_by_country()]
@@ -104,5 +106,5 @@ def test_units_delivered_by_product_by_country_api(
     data = json.loads(rv.data)
 
     def sort_key(item):
-        return '{product[id]}.{country[id]}'.format(**item)
+        return '{product_id}.{country_id}'.format(**item)
     assert sorted(expected, key=sort_key) == sorted(data, key=sort_key)

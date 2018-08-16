@@ -10,3 +10,4 @@ marshmallow-sqlalchemy==0.14.0
 pytest-flask-sqlalchemy==1.0.0
 psycopg2==2.7.5
 flake8==3.5.0
+Flask-Cors==3.0.6

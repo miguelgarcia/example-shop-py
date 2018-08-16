@@ -132,5 +132,5 @@ def test_units_delivered_by_product_by_country(
     tmp = ProductsManager.units_delivered_by_product_by_country()
     result = {}
     for row in tmp:
-        result[str(row[0].id)+'-'+str(row[1].id)] = row[2]
+        result[str(row.product_id)+'-'+str(row.country_id)] = row.units
     assert result == expected

@@ -189,7 +189,10 @@ class ProductsManager:
         country = aliased(Customer.country, name='country')
         q = (
             db.session.query(
-                product, country,
+                label('product_name', product.name),
+                label('product_id', product.id),
+                label('country_name', country.name),
+                label('country_id', country.id),
                 label('units', func.sum(OrderDetail.quantity))
             )
             .outerjoin(product.orders_details)

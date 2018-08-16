@@ -62,7 +62,7 @@ class ProductDeserializeSchema(ProductSchema):
     status = ma.Function(deserialize=models.ProductStatusEnum.find,
                          required=True,
                          validate=[validate.NoneOf([None])])
-    tags = ma.List(ma.String())
+    tags = ma.List(ma.String(), required=True)
 
 
 class OrderDetailSchema(ma.ModelSchema):
@@ -153,6 +153,8 @@ class SellsByProductSchema(ma.Schema):
 
 
 class UnitsDeliveredByProductByCountrySchema(ma.Schema):
-    product = ma.Nested(ProductSchema)
-    country = ma.Nested(CountrySchema)
+    product_name = ma.String()
+    product_id = ma.Integer()
+    country_name = ma.String()
+    country_id = ma.Integer()
     units = ma.Integer()
