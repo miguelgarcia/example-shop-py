@@ -15,7 +15,7 @@ def client(app):
 
 @pytest.fixture(scope='session')
 def app():
-    _app = create_app('project.config.TestingConfig')
+    _app = create_app({'TESTING': True})
     ctx = _app.app_context()
     ctx.push()
     yield _app

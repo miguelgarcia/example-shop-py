@@ -11,8 +11,10 @@ migrate = Migrate()
 cors = CORS()
 
 
-def create_app(config_name=None):
-    if config_name is None:
+def create_app(options={}):
+    if 'TESTING' in options and options['TESTING']:
+        config_name = 'project.config.TestingConfig'
+    else:
         config_name = os.getenv(
             'APP_SETTINGS',
             'project.config.DevelopmentConfig'
