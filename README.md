@@ -27,6 +27,8 @@ http://editor.swagger.io to load the yaml file and play with de API (point line 
 
 - Model diagram
 
+![Model diagram](https://raw.githubusercontent.com/miguelgarcia/example-shop-py/master/dbmodel.png)
+
 # Local development environment
 
     python3 -m venv venv
