@@ -22,10 +22,10 @@ Besides CRUD functionality the API also exposes statistics, produced with custom
 - Units delivered by product by country
 
 
-Complete REST api documentation can be found in the `openapi.yaml` file.
+Complete REST api documentation can be found in the `openapi.yaml` file. Use 
+http://editor.swagger.io to load the yaml file and play with de API (point line 8 of `openapi.yaml` to your server, ex: `url: 'http://localhost:5000/api'`.
 
 - Model diagram
-- Dockerize
 
 # Local development environment
 
@@ -35,7 +35,6 @@ Complete REST api documentation can be found in the `openapi.yaml` file.
     pip install -e .
     app db upgrade
     app db populate_db
-
     
 ## Run
 
@@ -47,3 +46,17 @@ Complete REST api documentation can be found in the `openapi.yaml` file.
     . ./venv/bin/activate
     pytest
     
+# Building Docker Image
+
+    docker build . -t example-shop-py
+
+## Running docker
+
+An example docker-compose.yml is provided. It creates two containers, the app
+and a PostgreSQL database.
+
+Try it running:
+
+    docker-compose up
+
+App will be published at http://localhost:5000/

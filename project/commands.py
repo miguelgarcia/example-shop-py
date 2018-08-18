@@ -1,7 +1,7 @@
 import os
 
 import click
-from app import create_app
+from project.app import create_app
 from flask.cli import FlaskGroup
 
 
