@@ -122,7 +122,7 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(50), nullable=False, unique=True)
     description = db.Column(db.UnicodeText())
-    price = db.Column(db.Numeric(10, 2, asdecimal=True))
+    price = db.Column(db.Numeric(10, 5, asdecimal=True))
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'),
                             nullable=False)
     category = db.relationship('Category', backref=db.backref(
@@ -243,7 +243,7 @@ class OrderDetail(db.Model):
                            nullable=False)
     product = db.relationship('Product', backref=db.backref('orders_details'),
                               lazy='joined')
-    unit_price = db.Column(db.Numeric(10, 2, asdecimal=True))
+    unit_price = db.Column(db.Numeric(10, 5, asdecimal=True))
     quantity = db.Column(db.Integer, nullable=False)
 
     @hybrid_property

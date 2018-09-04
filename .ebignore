@@ -1,0 +1,11 @@
+.circleci
+.pytest_cache
+.vscode
+docker
+UNKNOWN.egg-info
+dbmodel.png
+docker-compose.yml
+Dockerfile
+openapi.yaml
+venv
+project/simple-shop.db
