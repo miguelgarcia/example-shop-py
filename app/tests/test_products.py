@@ -1,5 +1,5 @@
 from flask import json
-from project import models
+from app import models
 
 from .utils import (expected_404, expected_integrity_error, model_to_dict,
                     product_to_dict)

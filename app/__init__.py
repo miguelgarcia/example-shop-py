@@ -13,11 +13,11 @@ cors = CORS()
 
 def create_app(options={}):
     if 'TESTING' in options and options['TESTING']:
-        config_name = 'project.config.TestingConfig'
+        config_name = 'app.config.TestingConfig'
     else:
         config_name = os.getenv(
             'APP_SETTINGS',
-            'project.config.DevelopmentConfig'
+            'app.config.DevelopmentConfig'
         )
     app = Flask(__name__)
     app.config.from_object(config_name)
@@ -34,5 +34,5 @@ def init_extensions(app):
 
 
 def register_blueprints(app):
-    from project.restapi import api
+    from app.restapi import api
     app.register_blueprint(api, url_prefix='/api')

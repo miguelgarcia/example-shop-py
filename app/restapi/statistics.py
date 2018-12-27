@@ -1,4 +1,4 @@
-from project.models import CustomersManager, OrdersManager, ProductsManager
+from app.models import CustomersManager, OrdersManager, ProductsManager
 
 from .blueprint import api
 from .schemas import (CustomersByCountrySchema, OrdersByStatusSchema,

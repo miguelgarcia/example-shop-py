@@ -4,7 +4,7 @@ import random
 
 import dateutil
 from flask import json
-from project import models
+from app import models
 
 from .utils import expected_404, model_to_dict
 

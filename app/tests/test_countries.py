@@ -1,5 +1,5 @@
 from flask import json
-from project import models
+from app import models
 from .utils import country_to_dict, expected_404, expected_integrity_error
 
 

@@ -1,6 +1,6 @@
-from project.app import ma
+from app import ma
 from marshmallow import validate, post_load
-from project import models
+from app import models
 
 
 class ListArgsSchema(ma.Schema):

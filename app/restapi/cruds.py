@@ -1,4 +1,4 @@
-from project.models import Category, Country, Customer, Order, Product
+from app.models import Category, Country, Customer, Order, Product
 
 from .basecrudview import CrudView
 from .schemas import (CategorySchema, CountrySchema, CustomerDeserializeSchema,

@@ -36,7 +36,7 @@ http://editor.swagger.io to load the yaml file and play with de API (point line 
     pip install -r requirements.txt
     pip install -e .
     app db upgrade
-    app db populate_db
+    app populate-db
     
 ## Run
 

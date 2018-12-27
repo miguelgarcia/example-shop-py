@@ -1,6 +1,6 @@
 import random
 
-from project.models import (Customer, CustomersManager, OrdersManager,
+from app.models import (Customer, CustomersManager, OrdersManager,
                             OrderStatusEnum, ProductsManager)
 from sqlalchemy.exc import IntegrityError
 

@@ -2,7 +2,7 @@ from flask.views import MethodView
 from flask import jsonify, request
 from .schemas import ListArgsSchema
 from sqlalchemy.exc import IntegrityError
-from project.app import db
+from app import db
 
 
 class CrudView(MethodView):

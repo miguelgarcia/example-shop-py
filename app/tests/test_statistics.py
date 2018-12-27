@@ -1,7 +1,7 @@
 import random
 
 from flask import json
-from project.models import (CustomersManager, OrdersManager, OrderStatusEnum,
+from app.models import (CustomersManager, OrdersManager, OrderStatusEnum,
                             ProductsManager)
 
 from .utils import category_to_dict, country_to_dict, product_to_dict

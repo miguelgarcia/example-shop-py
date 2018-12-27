@@ -1,7 +1,7 @@
 import os
 
 import click
-from project.app import create_app
+from app import create_app
 from flask.cli import FlaskGroup
 
 
@@ -19,9 +19,9 @@ def cli(debug):
 @cli.command()
 def populate_db():
     """ Populates the database with random data """
-    import project.tests.factories as factories
+    import app.tests.factories as factories
     import random
-    from project.models import OrderStatusEnum
+    from app.models import OrderStatusEnum
 
     countries = factories.CountryFactory.create_batch(10)
     customers = []

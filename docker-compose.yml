@@ -13,7 +13,7 @@ services:
     environment:
       SECRET_KEY: my_secret
       DATABASE_URI: postgresql+psycopg2://exampleshop:exampleshop@db/exampleshop
-      APP_SETTINGS: project.config.ProductionConfig
+      APP_SETTINGS: app.config.ProductionConfig
     ports:
       - "5000:80"
     depends_on:

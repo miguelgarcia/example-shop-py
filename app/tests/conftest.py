@@ -1,10 +1,10 @@
 import pytest
 
-from project.app import create_app
-from project.app import db
+from app import create_app
+from app import db
 
 pytest_plugins = [
-    "project.tests.factories",
+    "app.tests.factories",
 ]
 
 

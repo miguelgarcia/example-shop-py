@@ -1,6 +1,6 @@
 import factory
-from project import models
-from project.app import db
+from app import models
+from app import db
 
 from .factoryboyfixture import make_fixture
 
